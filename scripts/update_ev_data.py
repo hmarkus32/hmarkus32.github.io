@@ -99,6 +99,51 @@ def fetch_odometer(vehicle_id):
         print(f"Odometer fetch error: {e}")
         return None
 
+def fetch_vin(vehicle_id):
+    """Fetch VIN from getUserInfo. Returns None on failure."""
+    headers = get_headers()
+    if not headers:
+        return None
+    query = {
+        "operationName": "getUserInfo",
+        "variables": {},
+        "query": """query getUserInfo {
+            currentUser {
+                vehicles {
+                    id
+                    vin
+                    name
+                }
+            }
+        }"""
+    }
+    try:
+        r = requests.post(
+            "https://rivian.com/api/gql/gateway/graphql",
+            headers=headers,
+            json=query,
+            timeout=30,
+        )
+        if r.status_code != 200:
+            print(f"VIN fetch failed {r.status_code}")
+            return None
+        vehicles = r.json().get("data", {}).get("currentUser", {}).get("vehicles") or []
+        for v in vehicles:
+            if vehicle_id is None or v.get("id") == vehicle_id:
+                vin = v.get("vin")
+                if vin:
+                    print(f"VIN: {vin}")
+                    return vin
+        if vehicles and vehicles[0].get("vin"):
+            vin = vehicles[0]["vin"]
+            print(f"VIN (first vehicle): {vin}")
+            return vin
+        print("No VIN found")
+        return None
+    except Exception as e:
+        print(f"VIN fetch error: {e}")
+        return None
+
 def iso(s):
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
@@ -157,9 +202,11 @@ def normalize(rivian_rows):
 
     out.sort(key=lambda x: x["s"])
     odometer = fetch_odometer(vehicle_id) if vehicle_id else None
+    vin = fetch_vin(vehicle_id)
     result = {
         "generated": datetime.now(timezone.utc).isoformat()[:19] + "Z",
         "odometer": odometer,
+        "vin": vin,
         "sessions": out,
     }
     print(len(out), "Rivian sessions")
