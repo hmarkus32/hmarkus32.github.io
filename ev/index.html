@@ -3,7 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFB100' d='M12 2 4 8v8l8 6 8-6V8z'/%3E%3C/svg%3E"><title>Reba Charging</title><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
-:root{--bg:#0c0d0f;--card:#16181c;--line:#25282d;--tx:#f0f2f4;--mu:#9aa0a6;--ac:#FFB100;--ac2:#ffc933;--ac-soft:#3a2f14}
+:root{--bg:#0c0d0f;--card:#16181c;--line:#25282d;--tx:#f0f2f4;--mu:#9aa0a6;--ac:#FFB100;--ac2:#ffc933;--ac-soft:#3a2f14;--rivian:#00B4D8}
 *{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
 header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px;width:100%}
 .logo-title{display:flex;align-items:center;gap:10px}
@@ -25,11 +25,12 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226}
 .snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .snake-header h3{margin:0;font-size:16px;font-weight:600;color:var(--tx)}
-.info-btn{background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0;line-height:1;position:relative}
-.info-btn:hover{color:var(--ac)}
-.info-tooltip{display:none;position:absolute;left:0;top:20px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:280px;z-index:10;line-height:1.4}
+.info-btn{background:none;border:none;cursor:pointer;padding:0;position:relative}
+.info-btn .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.info-btn:hover .i-icon{border-color:var(--ac);color:var(--ac)}
+.info-tooltip{display:none;position:absolute;left:0;top:22px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:280px;z-index:10;line-height:1.4}
 .info-btn:hover .info-tooltip,.info-btn:focus .info-tooltip{display:block}
-.snake-wrap{position:relative;width:100%;height:200px;margin:8px 0}
+.snake-wrap{position:relative;width:100%;height:220px;margin:8px 0}
 .snake-svg{width:100%;height:100%;overflow:visible}
 .snake-path{fill:none;stroke:#25282d;stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
 .snake-fill{fill:none;stroke:url(#snakeGrad);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .6s ease}
@@ -38,7 +39,7 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .snake-marker .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .snake-marker.reached .i-icon{border-color:var(--ac);color:var(--ac)}
 .snake-marker .i-icon:hover .info-tooltip{display:block}
-.snake-marker .info-tooltip{width:160px;top:22px;left:50%;transform:translateX(-50%);text-align:center}
+.snake-marker .info-tooltip{width:180px;top:22px;left:50%;transform:translateX(-50%);text-align:center}
 .snake-stats{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:13px}
 .snake-stats b{color:var(--ac);font-variant-numeric:tabular-nums}
 .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
@@ -78,30 +79,37 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="snake-card">
   <div class="snake-header">
     <h3>Falcon 9 Recovery</h3>
-    <button class="info-btn" aria-label="Info">ℹ<span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence: boostback, reentry, and landing burns. Most of this energy is lost as exhaust heat; only a small fraction does useful work slowing the booster.</span></button>
+    <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat.</span></button>
   </div>
   <div class="snake-wrap" id="snakeWrap">
-    <svg class="snake-svg" viewBox="0 0 600 180" preserveAspectRatio="none">
+    <svg class="snake-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
       <defs>
         <linearGradient id="snakeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stop-color="#FFB100"/>
           <stop offset="100%" stop-color="#ffc933"/>
         </linearGradient>
       </defs>
-      <path class="snake-path" id="snakePath" d="M30 40 H560 Q580 40 580 60 V70 Q580 90 560 90 H40 Q20 90 20 110 V120 Q20 140 40 140 H570"/>
-      <path class="snake-fill" id="snakeFill" d="M30 40 H560 Q580 40 580 60 V70 Q580 90 560 90 H40 Q20 90 20 110 V120 Q20 140 40 140 H570"/>
-      <line class="snake-dot" x1="300" y1="20" x2="300" y2="55"/>
-      <line class="snake-dot" x1="150" y1="70" x2="150" y2="105"/>
-      <line class="snake-dot" x1="450" y1="120" x2="450" y2="155"/>
+      <path class="snake-path" id="snakePath" d="M30 50 H540 Q570 50 570 80 V90 Q570 120 540 120 H60 Q30 120 30 150 V160 Q30 190 60 190 H570"/>
+      <path class="snake-fill" id="snakeFill" d="M30 50 H540 Q570 50 570 80 V90 Q570 120 540 120 H60 Q30 120 30 150 V160 Q30 190 60 190 H570"/>
+      <line class="snake-dot" x1="80" y1="30" x2="80" y2="65"/>
+      <line class="snake-dot" x1="200" y1="30" x2="200" y2="65"/>
+      <line class="snake-dot" x1="350" y1="100" x2="350" y2="135"/>
+      <line class="snake-dot" x1="480" y1="170" x2="480" y2="205"/>
     </svg>
-    <div class="snake-marker" id="m1" style="left:50%;top:12%">
-      <div class="i-icon">i<span class="info-tooltip">Boostback burn</span></div>
+    <div class="snake-marker" id="mHome" style="left:13%;top:8%">
+      <div class="i-icon">i<span class="info-tooltip">Typical US home for a year (~10,000 kWh)</span></div>
     </div>
-    <div class="snake-marker" id="m2" style="left:25%;top:50%">
-      <div class="i-icon">i<span class="info-tooltip">Reentry burn</span></div>
+    <div class="snake-marker" id="mESB" style="left:33%;top:8%">
+      <div class="i-icon">i<span class="info-tooltip">Empire State Building for one hour (~5,000 kWh)</span></div>
     </div>
-    <div class="snake-marker" id="m3" style="left:75%;top:78%">
-      <div class="i-icon">i<span class="info-tooltip">Landing burn</span></div>
+    <div class="snake-marker" id="m1" style="left:58%;top:55%">
+      <div class="i-icon">i<span class="info-tooltip">Boostback burn: flips the booster and slows it so it returns toward the landing zone</span></div>
+    </div>
+    <div class="snake-marker" id="m2" style="left:25%;top:70%">
+      <div class="i-icon">i<span class="info-tooltip">Reentry burn: protects the booster from heating and structural loads as it hits the atmosphere</span></div>
+    </div>
+    <div class="snake-marker" id="m3" style="left:80%;top:88%">
+      <div class="i-icon">i<span class="info-tooltip">Landing burn: final slowdown so the booster can be caught or land softly</span></div>
     </div>
   </div>
   <div class="snake-stats">
@@ -112,7 +120,8 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="grid">
 <div class="card wide"><h3>Energy & spend over time</h3><div class="ch" id="cT"></div></div>
 <div class="card wide"><h3>By network</h3><div class="ch" id="cN" style="height:120px"></div></div>
-<div class="card"><h3>Top locations (kWh)</h3><div class="ch" id="cL"></div></div>
+<div class="card"><h3>Top locations (MWh)</h3><div class="ch" id="cL"></div></div>
+<div class="card"><h3>RAN breakdown (kWh)</h3><div class="ch" id="cRAN"></div></div>
 <div class="card"><h3>Speed distribution</h3><div class="ch" id="cS"></div></div>
 <div class="card wide"><h3>Sessions</h3><div class="tw"><table><thead><tr id="th"></tr></thead><tbody id="tb"></tbody></table></div></div></div>
 <script>
@@ -121,7 +130,7 @@ const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
-const MARKERS=[{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
+const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
 const MI_PER_KWH=2.4;
 const GAS_MPG=20;
 const GAS_PRICE={
@@ -132,7 +141,7 @@ const GAS_PRICE={
 };
 function gasPrice(day){const m=day.slice(0,7);return GAS_PRICE[m]||4.0;}
 let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
-const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
+const C={};['cT','cN','cL','cRAN','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
 function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
 addEventListener('resize',resizeCharts);
 const base={backgroundColor:'transparent',textStyle:{color:'#9aa0a6',fontFamily:'Outfit'},animationDuration:500,animationDurationUpdate:600,animationEasingUpdate:'cubicInOut',grid:{left:36,right:36,top:28,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4',fontFamily:'Outfit'}}};
@@ -162,26 +171,30 @@ function updateSnake(kwh){
   path.style.strokeDashoffset=len*(1-pct);
   $('snakePct').textContent=Math.round(pct*100)+'%';
   $('snakeText').textContent=fm(kwh)+' / '+fm(ROCKET_TARGET)+' kWh';
-  MARKERS.forEach(m=>{const el=$(m.id);el.classList.toggle('reached',pct*100>=m.pct)});
+  MARKERS.forEach(m=>{const el=$(m.id);if(el)el.classList.toggle('reached',pct*100>=m.pct)});
 }
-function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.filter(x=>x.cost!=null),cost=paid.reduce((a,x)=>a+x.cost,0),pk=paid.reduce((a,x)=>a+x.kwh,0),hrs=R.reduce((a,x)=>a+x.d/60,0);
+function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),cost=R.reduce((a,x)=>a+(x.cost||0),0),hrs=R.reduce((a,x)=>a+x.d/60,0);
  let saved=0;
  R.forEach(x=>{const miles=x.kwh*MI_PER_KWH;const gas=(miles/GAS_MPG)*gasPrice(x.day);const elec=x.cost||0;saved+=gas-elec;});
- $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';$('k6').textContent='$'+fm(saved,0);
+ $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=kwh?'$'+fm(cost/kwh,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';$('k6').textContent='$'+fm(saved,0);
  updateSnake(kwh);
  const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
  const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
  C.cT.setOption({...base,legend:{textStyle:{color:'#9aa0a6'},top:0,left:'center'},grid:{left:36,right:40,top:44,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4'},formatter:params=>{let s=params[0].axisValue+'<br>';params.forEach(p=>{const v=p.value;s+=p.marker+' '+p.seriesName+': '+(p.seriesName==='Spend'?'$'+fm(v,2):fm(v,1))+'<br>';});return s;}},xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
-  series:[{name:'Spend',type:'bar',data:ks.map(k=>+M[k].c.toFixed(2)),barMinHeight:2,itemStyle:{color:'#FFB100',borderRadius:[3,3,0,0]}},{name:'kWh',type:'line',yAxisIndex:1,smooth:true,symbol:'none',data:ks.map(k=>+M[k].e.toFixed(1)),lineStyle:{color:'#ffc933',width:2},areaStyle:{color:'rgba(255,177,0,.08)'}}]},{replaceMerge:['xAxis']});
+  series:[{name:'Spend',type:'bar',data:ks.map(k=>+M[k].c.toFixed(2)),barMinHeight:2,itemStyle:{color:'#FFB100',borderRadius:[3,3,0,0]}},{name:'kWh',type:'line',yAxisIndex:1,smooth:true,symbol:'none',data:ks.map(k=>+M[k].e.toFixed(1)),lineStyle:{color:'#00B4D8',width:2},areaStyle:{color:'rgba(0,180,216,.08)'}}]},{replaceMerge:['xAxis']});
  const N={};R.forEach(x=>{N[x.net]=N[x.net]||{k:0,c:0,n:0};N[x.net].k+=x.kwh;N[x.net].c+=x.cost||0;N[x.net].n++});
  const nets=Object.keys(N), totalK=nets.reduce((a,n)=>a+N[n].k,0)||1;
  C.cN.setOption({...base,tooltip:{trigger:'item',formatter:p=>`${p.name}<br>${fm(p.value)} kWh · $${fm(N[p.name].c,2)} · ${N[p.name].n} sessions`,backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4'}},
   legend:{bottom:0,textStyle:{color:'#9aa0a6'},itemWidth:10,itemHeight:10},grid:{left:10,right:10,top:10,bottom:40},
   xAxis:{type:'value',max:totalK,show:false},yAxis:{type:'category',data:[''],show:false},
   series:nets.map(n=>({name:n,type:'bar',stack:'n',barWidth:40,itemStyle:{color:COL[n]||'#888',borderRadius:4},data:[+N[n].k.toFixed(1)],label:{show:N[n].k/totalK>0.08,position:'inside',color:'#000',formatter:p=>fm(p.value,0)+' kWh'}}))});
- const L={};R.forEach(x=>{L[x.site]=L[x.site]||{k:0,c:0};L[x.site].k+=x.kwh;L[x.site].c+=x.cost||0});const lt=Object.entries(L).sort((a,b)=>b[1].k-a[1].k).slice(0,10).reverse();
- const sn=n=>{const m=n.match(/^([^,]+),\s*([A-Z]{2})\b/);if(m)return m[1].trim()+', '+m[2];return n.length>18?n.slice(0,17)+'…':n};
- C.cL.setOption({...base,grid:{left:110,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value,1)} kWh · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',name:'kWh',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:100,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:lt.map(x=>+x[1].k.toFixed(1)),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
+ const L={};R.forEach(x=>{const site=x.net==='Rivian Adventure Network'?'RAN (all)':x.site;L[site]=L[site]||{k:0,c:0};L[site].k+=x.kwh;L[site].c+=x.cost||0});
+ const lt=Object.entries(L).sort((a,b)=>b[1].k-a[1].k).slice(0,8).reverse();
+ const sn=n=>{const m=n.match(/^([^,]+),\s*([A-Z]{2})\b/);if(m)return m[1].trim()+', '+m[2];return n.length>16?n.slice(0,15)+'…':n};
+ C.cL.setOption({...base,grid:{left:100,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value*1000,1)} kWh · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',name:'MWh',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:90,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:lt.map(x=>+(x[1].k/1000).toFixed(2)),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
+ const RAN={};R.filter(x=>x.net==='Rivian Adventure Network').forEach(x=>{RAN[x.site]=RAN[x.site]||{k:0,c:0};RAN[x.site].k+=x.kwh;RAN[x.site].c+=x.cost||0});
+ const ranLt=Object.entries(RAN).sort((a,b)=>b[1].k-a[1].k).slice(0,8).reverse();
+ C.cRAN.setOption({...base,grid:{left:100,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value,1)} kWh · $${fm(RAN[p[0].name].c,2)}`},xAxis:{type:'value',name:'kWh',...ax},yAxis:{type:'category',data:ranLt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:90,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:ranLt.map(x=>+x[1].k.toFixed(1)),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
  const bins=[0,5,7,10,20,50,75,100,150,250],bl=bins.map((b,i)=>i<bins.length-1?`${b}–${bins[i+1]}`:`${b}+`);
  C.cS.setOption({...base,legend:{show:false},xAxis:{type:'category',data:bl,name:'kW',...ax,axisLabel:{fontSize:10}},yAxis:{type:'value',...ax},series:[{name:'Sessions',type:'bar',itemStyle:{color:'#FFB100',borderRadius:[3,3,0,0]},data:bl.map((_,j)=>R.filter(x=>x.kw>=bins[j]&&(j==bins.length-1||x.kw<bins[j+1])).length)}]});
  table(R);setTimeout(resizeCharts,50)}
