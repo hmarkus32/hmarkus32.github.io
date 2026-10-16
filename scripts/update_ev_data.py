@@ -20,14 +20,13 @@ if os.environ.get("VEHICLE_NAMES"):
     except Exception:
         pass
 
-def fetch_rivian():
+def get_headers():
     app = os.environ.get("RIVIAN_APP_SESSION_TOKEN")
     user = os.environ.get("RIVIAN_USER_SESSION_TOKEN")
     csrf = os.environ.get("RIVIAN_CSRF_TOKEN")
     if not all([app, user, csrf]):
-        print("Rivian tokens missing; skipping fetch")
-        return []
-    headers = {
+        return None
+    return {
         "A-Sess": app,
         "U-Sess": user,
         "Csrf-Token": csrf,
@@ -35,6 +34,12 @@ def fetch_rivian():
         "Apollographql-Client-Name": "com.rivian.ios.consumer-apollo-ios",
         "Content-Type": "application/json",
     }
+
+def fetch_rivian():
+    headers = get_headers()
+    if not headers:
+        print("Rivian tokens missing; skipping fetch")
+        return []
     query = {
         "operationName": "getCompletedSessionSummaries",
         "variables": {},
@@ -57,6 +62,42 @@ def fetch_rivian():
     data = r.json().get("data", {}).get("getCompletedSessionSummaries") or []
     print(f"{len(data)} Rivian sessions")
     return data
+
+def fetch_odometer(vehicle_id):
+    """Fetch current odometer in miles from vehicle state. Returns None on failure."""
+    headers = get_headers()
+    if not headers or not vehicle_id:
+        return None
+    query = {
+        "operationName": "GetVehicleState",
+        "variables": {"vehicleID": vehicle_id},
+        "query": """query GetVehicleState($vehicleID: String!) {
+            vehicleState(id: $vehicleID) {
+                vehicleMileage { value timeStamp }
+            }
+        }"""
+    }
+    try:
+        r = requests.post(
+            "https://rivian.com/api/gql/gateway/graphql",
+            headers=headers,
+            json=query,
+            timeout=30,
+        )
+        if r.status_code != 200:
+            print(f"Odometer fetch failed {r.status_code}")
+            return None
+        mileage = r.json().get("data", {}).get("vehicleState", {}).get("vehicleMileage", {})
+        meters = mileage.get("value")
+        if meters is None:
+            print("No vehicleMileage in response")
+            return None
+        miles = round(meters / 1609.344, 1)
+        print(f"Odometer: {miles} mi")
+        return miles
+    except Exception as e:
+        print(f"Odometer fetch error: {e}")
+        return None
 
 def iso(s):
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
@@ -83,7 +124,10 @@ def add(out, veh, st, en, site, net, kwh, cost, src):
 
 def normalize(rivian_rows):
     out = []
+    vehicle_id = None
     for r in rivian_rows:
+        if not vehicle_id and r.get("vehicleId"):
+            vehicle_id = r["vehicleId"]
         try:
             st = iso(r["startInstant"])
             en = iso(r["endInstant"])
@@ -112,8 +156,10 @@ def normalize(rivian_rows):
             continue
 
     out.sort(key=lambda x: x["s"])
+    odometer = fetch_odometer(vehicle_id) if vehicle_id else None
     result = {
         "generated": datetime.now(timezone.utc).isoformat()[:19] + "Z",
+        "odometer": odometer,
         "sessions": out,
     }
     print(len(out), "Rivian sessions")
