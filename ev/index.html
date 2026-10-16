@@ -3,7 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFB100' d='M12 2 4 8v8l8 6 8-6V8z'/%3E%3C/svg%3E"><title>Reba Charging</title><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
-:root{--bg:#0c0d0f;--card:#16181c;--line:#25282d;--tx:#f0f2f4;--mu:#9aa0a6;--ac:#FFB100;--ac2:#ffc933;--ac-soft:#3a2f14;--rivian:#00B4D8}
+:root{--bg:#0c0d0f;--card:#16181c;--line:#25282d;--tx:#f0f2f4;--mu:#9aa0a6;--ac:#FFB100;--ac2:#ffc933;--ac-soft:#3a2f14;--rivian:#00B4D8;--green:#7d9b6a;--blue:#5b8c9a}
 *{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
 header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px;width:100%}
 .logo-title{display:flex;align-items:center;gap:10px}
@@ -22,6 +22,9 @@ select,input{background:var(--card);color:var(--tx);border:1px solid var(--line)
 button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:10px;padding:10px 16px;cursor:pointer;align-self:flex-end;font:inherit}
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
 .kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%;border:1px solid #1f2226}.kpi b{display:block;font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ac)}.kpi span{color:var(--mu);font-size:12px;font-weight:500}
+.kpi.row1 b{color:var(--green)}
+.kpi.row3 b{color:var(--blue)}
+.kpi.full{grid-column:1/-1}
 .snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226}
 .snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .snake-header h3{margin:0;font-size:16px;font-weight:600;color:var(--tx)}
@@ -75,7 +78,15 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="f"><label>Time of day</label><div class="chips" id="ft"></div></div>
 <button class="reset" id="rst">Reset</button>
 </div></div>
-<div class="kpis"><div class="kpi"><span>Sessions</span><b id="k1"></b></div><div class="kpi"><span>Energy</span><b id="k2"></b></div><div class="kpi"><span>Spend</span><b id="k3"></b></div><div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div><div class="kpi"><span>Avg power</span><b id="k5"></b></div><div class="kpi"><span>Gas saved</span><b id="k6"></b></div><div class="kpi"><span>Odometer</span><b id="k7"></b></div></div>
+<div class="kpis">
+  <div class="kpi row1"><span>Sessions</span><b id="k1"></b></div>
+  <div class="kpi row1"><span>Energy</span><b id="k2"></b></div>
+  <div class="kpi"><span>Spend</span><b id="k3"></b></div>
+  <div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div>
+  <div class="kpi row3"><span>Avg power</span><b id="k5"></b></div>
+  <div class="kpi row3"><span>Gas saved</span><b id="k6"></b></div>
+  <div class="kpi full"><span id="k7label">Odometer</span><b id="k7"></b></div>
+</div>
 <div class="snake-card">
   <div class="snake-header">
     <h3>Falcon 9 Recovery</h3>
@@ -141,7 +152,7 @@ const GAS_PRICE={
   '2026-01':3.06,'2026-02':3.25,'2026-03':4.21,'2026-04':4.69,'2026-05':4.95,'2026-06':4.51,'2026-07':4.32,'2026-08':4.56,'2026-09':4.86,'2026-10':4.70
 };
 function gasPrice(day){const m=day.slice(0,7);return GAS_PRICE[m]||4.0;}
-let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1,ODO=null;
+let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1,ODO=null,VIN=null;
 const C={};['cT','cN','cL','cRAN','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
 function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
 addEventListener('resize',resizeCharts);
@@ -150,7 +161,8 @@ const ax={axisLine:{lineStyle:{color:'#2a2e33'}},splitLine:{lineStyle:{color:'#1
 function chips(id,items,set){const el=$(id);items.forEach(it=>{const c=document.createElement('span');c.className='chip';c.textContent=it;c.onclick=()=>{set.has(it)?set.delete(it):set.add(it);c.classList.toggle('on');render()};el.appendChild(c)})}
 function preset(days){const t=new Date();$('d1').value='';$('d0').value=days?new Date(t-days*864e5).toISOString().slice(0,10):'';render()}
 $('ftog').onclick=()=>{const f=$('filters');f.classList.toggle('open');$('farrow').textContent=f.classList.contains('open')?'▲':'▼'};
-fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;ODO=j.odometer;$('upd').textContent='Updated '+new Date(j.generated).toLocaleString();
+fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;ODO=j.odometer;VIN=j.vin;$('upd').textContent='Updated '+new Date(j.generated).toLocaleString();
+ if(VIN)$('k7label').textContent='Odometer | '+VIN;
  chips('fn',[...new Set(S.map(x=>x.net))],F.n);chips('fs',SPEED.map(x=>x[0]),F.s);chips('fd',DOW,F.d);chips('ft',TOD.map(x=>x[0]),F.t);
  [['30D',30],['90D',90],['YTD',-1],['1Y',365],['All',0]].forEach(([l,d])=>{const c=document.createElement('span');c.className='chip';c.textContent=l;c.onclick=()=>d<0?($('d0').value=new Date().getFullYear()+'-01-01',$('d1').value='',render()):preset(d);$('fp').appendChild(c)});
  const locs={};S.forEach(x=>locs[x.site]=(locs[x.site]||0)+1);Object.entries(locs).sort((a,b)=>b[1]-a[1]).forEach(([l,n])=>$('fl').add(new Option(`${l} (${n})`,l)));
