@@ -23,6 +23,19 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
 .kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%;border:1px solid #1f2226}.kpi b{display:block;font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ac)}.kpi span{color:var(--mu);font-size:12px;font-weight:500}
 .kpi:nth-child(5){grid-column:1/-1}
+.rocket-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--card);border-radius:14px;margin:0 12px 12px;border:1px solid #1f2226}
+.rocket-info{flex:1}
+.rocket-info h3{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:6px}
+.rocket-info p{margin:0;font-size:12px;color:var(--mu)}
+.info-btn{background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0;line-height:1;position:relative}
+.info-btn:hover{color:var(--ac)}
+.info-tooltip{display:none;position:absolute;left:0;top:20px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:240px;z-index:10;line-height:1.4}
+.info-btn:hover .info-tooltip,.info-btn:focus .info-tooltip{display:block}
+.rocket-bar-wrap{position:relative;width:48px;height:160px;flex-shrink:0}
+.rocket-bar{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:28px;height:140px;background:#25282d;border-radius:14px 14px 6px 6px;overflow:hidden;border:2px solid #3a3e44}
+.rocket-bar::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:16px solid #3a3e44}
+.rocket-fill{position:absolute;bottom:0;left:0;width:100%;background:linear-gradient(to top,#FFB100,#ffc933);transition:height .6s ease;border-radius:0 0 4px 4px}
+.rocket-pct{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--ac);white-space:nowrap}
 .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
 .card{background:var(--card);border-radius:14px;padding:12px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;border:1px solid #1f2226}.card h3{margin:0 0 8px;font-weight:600;font-size:13px;color:var(--mu)}
 .ch{height:220px;width:100%;max-width:100%}.wide{grid-column:1/-1}
@@ -35,6 +48,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
   .filters{padding:0 24px 16px}
   header{padding:20px 24px 4px}
   .ch{height:280px}
+  .rocket-card{margin:0 24px 16px}
 }
 </style></head><body>
 <header>
@@ -57,6 +71,16 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <button class="reset" id="rst">Reset</button>
 </div></div>
 <div class="kpis"><div class="kpi"><span>Sessions</span><b id="k1"></b></div><div class="kpi"><span>Energy</span><b id="k2"></b></div><div class="kpi"><span>Spend</span><b id="k3"></b></div><div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div><div class="kpi"><span>Avg power</span><b id="k5"></b></div></div>
+<div class="rocket-card">
+  <div class="rocket-bar-wrap">
+    <div class="rocket-bar"><div class="rocket-fill" id="rocketFill" style="height:0%"></div></div>
+    <div class="rocket-pct" id="rocketPct">0%</div>
+  </div>
+  <div class="rocket-info">
+    <h3>Falcon 9 Landing <button class="info-btn" aria-label="Info">ℹ<span class="info-tooltip">Energy equivalent of the propellant used in a Falcon 9 first-stage final landing burn — the single-engine hover-slam that brings the booster down to the pad or drone ship. (A fraction of the full recovery sequence.)</span></button></h3>
+    <p id="rocketText">0 / 15,000 kWh</p>
+  </div>
+</div>
 <div class="grid">
 <div class="card wide"><h3>Energy & spend over time</h3><div class="ch" id="cT"></div></div>
 <div class="card wide"><h3>By network</h3><div class="ch" id="cN" style="height:120px"></div></div>
@@ -68,6 +92,7 @@ const $=id=>document.getElementById(id),DOW=['Sun','Mon','Tue','Wed','Thu','Fri'
 const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 100+',100,1e9]];
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
+const ROCKET_TARGET=15000;
 let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
 const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
 function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
@@ -93,6 +118,10 @@ const fm=(n,d=0)=>n.toLocaleString(undefined,{maximumFractionDigits:d,minimumFra
 let raf;function render(){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}
 function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.filter(x=>x.cost!=null),cost=paid.reduce((a,x)=>a+x.cost,0),pk=paid.reduce((a,x)=>a+x.kwh,0),hrs=R.reduce((a,x)=>a+x.d/60,0);
  $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';
+ const pct=Math.min(100,kwh/ROCKET_TARGET*100);
+ $('rocketFill').style.height=pct+'%';
+ $('rocketPct').textContent=Math.round(pct)+'%';
+ $('rocketText').textContent=fm(kwh)+' / '+fm(ROCKET_TARGET)+' kWh';
  const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
  const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
  C.cT.setOption({...base,legend:{textStyle:{color:'#9aa0a6'},top:0,left:'center'},grid:{left:36,right:40,top:44,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4'},formatter:params=>{let s=params[0].axisValue+'<br>';params.forEach(p=>{const v=p.value;s+=p.marker+' '+p.seriesName+': '+(p.seriesName==='Spend'?'$'+fm(v,2):fm(v,1))+'<br>';});return s;}},xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
