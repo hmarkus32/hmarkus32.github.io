@@ -12,9 +12,9 @@ MT = ZoneInfo("America/Denver")
 DATA_PATH = "ev/data.json"
 
 VNAME = {
-    "5YJ3E1EB6RF793480": "Model 3 “Ethel”",
-    "5YJ3E1EA8PF501560": "Model 3 (2023)",
-    "R": "Rivian R1S",
+    "5YJ3E1EB6RF793480": "Ethel",
+    "5YJ3E1EA8PF501560": "Appa",
+    "R": "Reba",
 }
 if os.environ.get("VEHICLE_NAMES"):
     try:
