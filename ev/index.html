@@ -1,1 +1,47 @@
-PLACEHOLDER_WILL_REPLACE
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFB100' d='M12 2 4 8v8l8 6 8-6V8z'/%3E%3C/svg%3E"><title>Reba Charging</title><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+:root{--bg:#0c0d0f;--card:#16181c;--line:#25282d;--tx:#f0f2f4;--mu:#9aa0a6;--ac:#FFB100;--ac2:#ffc933;--ac-soft:#3a2f14}
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px;width:100%}
+.logo-title{display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px;flex-shrink:0;object-fit:contain}
+h1{font-weight:700;font-size:24px;margin:0;letter-spacing:-.3px;color:var(--ac)}
+#upd{color:var(--mu);font-size:12px}
+.filters-wrap{position:sticky;top:0;z-index:5;background:rgba(12,13,15,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);width:100%}
+.filters-toggle{width:100%;background:none;border:none;color:var(--tx);padding:10px 16px;font:inherit;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.filters-toggle:active{background:#1c1e22}
+.filters{display:none;flex-wrap:wrap;gap:12px;padding:0 12px 16px;width:100%}.filters.open{display:flex}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 140px}.f label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+select,input{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;min-width:0;width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);color:var(--mu);border-radius:16px;padding:8px 14px;cursor:pointer;font-size:13px;user-select:none;font-weight:500}
+.chip.on{color:#000;border-color:var(--ac);background:var(--ac)}
+button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:10px;padding:10px 16px;cursor:pointer;align-self:flex-end;font:inherit}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
+.kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%;border:1px solid #1f2226}.kpi b{display:block;font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ac)}.kpi span{color:var(--mu);font-size:12px;font-weight:500}
+.kpi:nth-child(5){grid-column:1/-1}
+.grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
+.card{background:var(--card);border-radius:14px;padding:12px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;border:1px solid #1f2226}.card h3{margin:0 0 8px;font-weight:600;font-size:13px;color:var(--mu)}
+.ch{height:220px;width:100%;max-width:100%}.wide{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{color:var(--mu);font-weight:600;text-align:left;cursor:pointer;position:sticky;top:0;background:var(--card);padding:10px 6px;border-bottom:1px solid var(--line)}
+td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
+@media(min-width:700px){
+  .kpis{grid-template-columns:repeat(5,1fr);padding:16px 24px}
+  .kpi:nth-child(5){grid-column:auto}
+  .grid{grid-template-columns:repeat(2,1fr);padding:0 24px 16px}
+  .filters{padding:0 24px 16px}
+  header{padding:20px 24px 4px}
+  .ch{height:280px}
+}
+</style></head><body>
+<header>
+  <div class="logo-title">
+    <img class="logo" src="data:image/png;base64,LOGO" alt="Rivian">
+    <h1>Reba</h1>
+  </div>
+  <span id="upd"></span>
+</header>
+</body></html>
