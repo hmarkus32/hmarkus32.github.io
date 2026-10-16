@@ -20,9 +20,8 @@ select,input{background:var(--card);color:var(--tx);border:1px solid var(--line)
 .chip{background:var(--card);border:1px solid var(--line);color:var(--mu);border-radius:16px;padding:8px 14px;cursor:pointer;font-size:13px;user-select:none;font-weight:500}
 .chip.on{color:#000;border-color:var(--ac);background:var(--ac)}
 button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:10px;padding:10px 16px;cursor:pointer;align-self:flex-end;font:inherit}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
 .kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%;border:1px solid #1f2226}.kpi b{display:block;font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ac)}.kpi span{color:var(--mu);font-size:12px;font-weight:500}
-.kpi:nth-child(5),.kpi:nth-child(6){grid-column:1/-1}
 .snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226}
 .snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .snake-header h3{margin:0;font-size:16px;font-weight:600;color:var(--tx)}
@@ -48,16 +47,12 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{color:var(--mu);font-weight:600;text-align:left;cursor:pointer;position:sticky;top:0;background:var(--card);padding:10px 6px;border-bottom:1px solid var(--line)}
 td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 @media(min-width:700px){
-  .kpis{grid-template-columns:repeat(3,1fr);padding:16px 24px}
-  .kpi:nth-child(5),.kpi:nth-child(6){grid-column:auto}
+  .kpis{padding:16px 24px}
   .grid{grid-template-columns:repeat(2,1fr);padding:0 24px 16px}
   .filters{padding:0 24px 16px}
   header{padding:20px 24px 4px}
   .ch{height:280px}
   .snake-card{margin:0 24px 20px}
-}
-@media(min-width:1000px){
-  .kpis{grid-template-columns:repeat(6,1fr)}
 }
 </style></head><body>
 <header>
