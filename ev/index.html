@@ -29,7 +29,7 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .rocket-info p{margin:0;font-size:12px;color:var(--mu)}
 .info-btn{background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0;line-height:1;position:relative}
 .info-btn:hover{color:var(--ac)}
-.info-tooltip{display:none;position:absolute;left:0;top:20px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:240px;z-index:10;line-height:1.4}
+.info-tooltip{display:none;position:absolute;left:0;top:20px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:260px;z-index:10;line-height:1.4}
 .info-btn:hover .info-tooltip,.info-btn:focus .info-tooltip{display:block}
 .rocket-bar-wrap{position:relative;width:48px;height:160px;flex-shrink:0}
 .rocket-bar{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:28px;height:140px;background:#25282d;border-radius:14px 14px 6px 6px;overflow:hidden;border:2px solid #3a3e44}
@@ -77,8 +77,8 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     <div class="rocket-pct" id="rocketPct">0%</div>
   </div>
   <div class="rocket-info">
-    <h3>Falcon 9 Landing <button class="info-btn" aria-label="Info">ℹ<span class="info-tooltip">Energy equivalent of the propellant used in a Falcon 9 first-stage final landing burn — the single-engine hover-slam that brings the booster down to the pad or drone ship. (A fraction of the full recovery sequence.)</span></button></h3>
-    <p id="rocketText">0 / 15,000 kWh</p>
+    <h3>Falcon 9 Recovery <button class="info-btn" aria-label="Info">ℹ<span class="info-tooltip">Energy equivalent of the RP-1 used across the Falcon 9 first-stage recovery burns: boostback, reentry, and the final landing burn that brings the booster back to the pad or drone ship.</span></button></h3>
+    <p id="rocketText">0 / 50,000 kWh</p>
   </div>
 </div>
 <div class="grid">
@@ -92,7 +92,7 @@ const $=id=>document.getElementById(id),DOW=['Sun','Mon','Tue','Wed','Thu','Fri'
 const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 100+',100,1e9]];
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
-const ROCKET_TARGET=15000;
+const ROCKET_TARGET=50000;
 let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
 const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
 function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
