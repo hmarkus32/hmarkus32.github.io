@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EV Charging</title><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+:root{--bg:#0b0c0e;--card:#16181c;--line:#24272d;--tx:#e8e9eb;--mu:#8a8f98;--ac:#e82127}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:20px 24px 4px}h1{font-weight:500;font-size:22px;margin:0;letter-spacing:.5px}
+#upd{color:var(--mu);font-size:12px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;padding:12px 24px;position:sticky;top:0;background:rgba(11,12,14,.92);backdrop-filter:blur(8px);z-index:5;border-bottom:1px solid var(--line)}
+.f{display:flex;flex-direction:column;gap:3px}.f label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px}
+select,input{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;min-width:0}
+select[multiple]{height:30px}.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);color:var(--mu);border-radius:14px;padding:4px 10px;cursor:pointer;font-size:12px;user-select:none}
+.chip.on{color:var(--tx);border-color:#555;background:#22252b}button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:8px;padding:6px 10px;cursor:pointer;align-self:flex-end}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px}
+.kpi{background:var(--card);border-radius:12px;padding:14px 16px}.kpi b{display:block;font-size:26px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums}.kpi span{color:var(--mu);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 24px 16px}.card{background:var(--card);border-radius:12px;padding:12px}.card h3{margin:0 0 4px;font-weight:500;font-size:13px;color:var(--mu)}
+.ch{height:280px}.wide{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{color:var(--mu);font-weight:500;text-align:left;cursor:pointer;position:sticky;top:0;background:var(--card);padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid #1d2024}.tw{max-height:460px;overflow:auto}
+@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr;padding:0 12px 12px}.kpis,.filters{padding-left:12px;padding-right:12px}.filters{position:static}.ch{height:240px}}
+</style></head><body>
+<header><h1>Charging</h1><span id="upd"></span></header>
+<div class="filters">
+<div class="f"><label>Vehicle</label><div class="chips" id="fv"></div></div>
+<div class="f"><label>Network</label><div class="chips" id="fn"></div></div>
+<div class="f"><label>Date</label><div class="chips" id="fp"></div><div style="display:flex;gap:4px"><input type="date" id="d0"><input type="date" id="d1"></div></div>
+<div class="f"><label>Location</label><select id="fl"><option value="">All locations</option></select></div>
+<div class="f"><label>Speed</label><div class="chips" id="fs"></div></div>
+<div class="f"><label>$/kWh</label><div style="display:flex;gap:4px"><input id="c0" type="number" step=".05" placeholder="min" style="width:70px"><input id="c1" type="number" step=".05" placeholder="max" style="width:70px"></div></div>
+<div class="f"><label>Day</label><div class="chips" id="fd"></div></div>
+<div class="f"><label>Time of day</label><div class="chips" id="ft"></div></div>
+<button class="reset" id="rst">Reset</button></div>
+<div class="kpis"><div class="kpi"><span>Sessions</span><b id="k1"></b></div><div class="kpi"><span>Energy</span><b id="k2"></b></div><div class="kpi"><span>Spend</span><b id="k3"></b></div><div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div><div class="kpi"><span>Avg power</span><b id="k5"></b></div></div>
+<div class="grid">
+<div class="card wide"><h3>Spend &amp; energy over time</h3><div class="ch" id="cT"></div></div>
+<div class="card"><h3>By network</h3><div class="ch" id="cN"></div></div>
+<div class="card"><h3>Top locations</h3><div class="ch" id="cL"></div></div>
+<div class="card"><h3>Speed distribution (avg kW)</h3><div class="ch" id="cS"></div></div>
+<div class="card"><h3>When you charge</h3><div class="ch" id="cH"></div></div>
+<div class="card wide"><h3>Sessions</h3><div class="tw"><table><thead><tr id="th"></tr></thead><tbody id="tb"></tbody></table></div></div></div>
+<script>
+const $=id=>document.getElementById(id),DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 100+',100,1e9]];
+const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
+const COL={'Tesla Supercharger':'#e82127','Rivian Adventure Network':'#f2a900','Workplace – Weave':'#3e8ef7','Workplace – Qualtrics':'#22c4a8','Other':'#888'};
+const VCOL=['#e8e9eb','#9aa3b0','#f2a900','#3e8ef7'];
+let S=[],F={v:new Set,n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
+const C={};['cT','cN','cL','cS','cH'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
+addEventListener('resize',()=>Object.values(C).forEach(c=>c.resize()));
+const base={backgroundColor:'transparent',textStyle:{color:'#8a8f98'},animationDuration:500,animationDurationUpdate:600,animationEasingUpdate:'cubicInOut',grid:{left:48,right:48,top:28,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1d2024',borderColor:'#333',textStyle:{color:'#e8e9eb'}}};
+const ax={axisLine:{lineStyle:{color:'#333'}},splitLine:{lineStyle:{color:'#1f2226'}}};
+function chips(id,items,set){const el=$(id);items.forEach(it=>{const c=document.createElement('span');c.className='chip';c.textContent=it;c.onclick=()=>{set.has(it)?set.delete(it):set.add(it);c.classList.toggle('on');render()};el.appendChild(c)})}
+function preset(days){const t=new Date();$('d1').value='';$('d0').value=days?new Date(t-days*864e5).toISOString().slice(0,10):'';render()}
+fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;$('upd').textContent='Updated '+new Date(j.generated).toLocaleString();
+ chips('fv',[...new Set(S.map(x=>x.v))],F.v);chips('fn',[...new Set(S.map(x=>x.net))],F.n);chips('fs',SPEED.map(x=>x[0]),F.s);chips('fd',DOW,F.d);chips('ft',TOD.map(x=>x[0]),F.t);
+ [['30D',30],['90D',90],['YTD',-1],['1Y',365],['All',0]].forEach(([l,d])=>{const c=document.createElement('span');c.className='chip';c.textContent=l;c.onclick=()=>d<0?($('d0').value=new Date().getFullYear()+'-01-01',$('d1').value='',render()):preset(d);$('fp').appendChild(c)});
+ const locs={};S.forEach(x=>locs[x.site]=(locs[x.site]||0)+1);Object.entries(locs).sort((a,b)=>b[1]-a[1]).forEach(([l,n])=>$('fl').add(new Option(`${l} (${n})`,l)));
+ ['fl','d0','d1','c0','c1'].forEach(i=>$(i).oninput=render);
+ $('rst').onclick=()=>{Object.values(F).forEach(s=>s.clear());document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));['fl','d0','d1','c0','c1'].forEach(i=>$(i).value='');render()};
+ const cols=[['s','Start'],['v','Vehicle'],['net','Network'],['site','Location'],['kwh','kWh'],['cost','Cost'],['ppk','$/kWh'],['kw','Avg kW'],['d','Min']];
+ cols.forEach(([k,l])=>{const th=document.createElement('th');th.textContent=l;th.onclick=()=>{sortD=sortK==k?-sortD:-1;sortK=k;table(cur)};$('th').appendChild(th)});render()});
+const inB=(B,lbls,v)=>!lbls.size||B.some(b=>lbls.has(b[0])&&v>=b[1]&&v<b[2]);
+let cur=[];
+function filt(){const l=$('fl').value,d0=$('d0').value,d1=$('d1').value,c0=parseFloat($('c0').value),c1=parseFloat($('c1').value);
+ return S.filter(x=>(!F.v.size||F.v.has(x.v))&&(!F.n.size||F.n.has(x.net))&&(!l||x.site==l)&&(!d0||x.day>=d0)&&(!d1||x.day<=d1)&&inB(SPEED,F.s,x.kw)&&inB(TOD,F.t,x.h)&&(!F.d.size||F.d.has(DOW[x.dow]))&&(isNaN(c0)||(x.ppk!=null&&x.ppk>=c0))&&(isNaN(c1)||(x.ppk!=null&&x.ppk<=c1)))}
+const fm=(n,d=0)=>n.toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+let raf;function render(){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}
+function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.filter(x=>x.cost!=null),cost=paid.reduce((a,x)=>a+x.cost,0),pk=paid.reduce((a,x)=>a+x.kwh,0),hrs=R.reduce((a,x)=>a+x.d/60,0);
+ $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';
+ const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
+ const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
+ C.cT.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0,right:0},xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
+  series:[{name:'Spend',type:'bar',data:ks.map(k=>+M[k].c.toFixed(2)),itemStyle:{color:'#e82127',borderRadius:[3,3,0,0]}},{name:'kWh',type:'line',yAxisIndex:1,smooth:true,symbol:'none',data:ks.map(k=>+M[k].e.toFixed(1)),lineStyle:{color:'#e8e9eb',width:2},areaStyle:{color:'rgba(232,233,235,.06)'}}]},{replaceMerge:['xAxis']});
+ const N={};R.forEach(x=>{N[x.net]=N[x.net]||{k:0,c:0,n:0};N[x.net].k+=x.kwh;N[x.net].c+=x.cost||0;N[x.net].n++});
+ C.cN.setOption({...base,tooltip:{trigger:'item',formatter:p=>`${p.name}<br>${fm(p.value)} kWh · $${fm(N[p.name].c,2)} · ${N[p.name].n} sessions`,backgroundColor:'#1d2024',borderColor:'#333',textStyle:{color:'#e8e9eb'}},
+  series:[{type:'pie',radius:['52%','78%'],itemStyle:{borderColor:'#16181c',borderWidth:2},label:{color:'#bbb'},data:Object.entries(N).map(([n,v])=>({name:n,value:+v.k.toFixed(1),itemStyle:{color:COL[n]||'#888'}}))}]});
+ const L={};R.forEach(x=>{L[x.site]=L[x.site]||{n:0,c:0};L[x.site].n++;L[x.site].c+=x.cost||0});const lt=Object.entries(L).sort((a,b)=>b[1].n-a[1].n).slice(0,10).reverse();
+ C.cL.setOption({...base,grid:{left:130,right:20,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${p[0].value} sessions · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax},series:[{type:'bar',data:lt.map(x=>x[1].n),itemStyle:{color:'#3e8ef7',borderRadius:[0,3,3,0]},barMaxWidth:18}]});
+ const bins=[0,5,7,10,20,50,75,100,150,250],bl=bins.map((b,i)=>i<bins.length-1?`${b}–${bins[i+1]}`:`${b}+`),vs=[...new Set(S.map(x=>x.v))];
+ C.cS.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0},xAxis:{type:'category',data:bl,name:'kW',...ax},yAxis:{type:'value',...ax},series:vs.map((v,i)=>({name:v,type:'bar',stack:'s',itemStyle:{color:VCOL[i%4]},data:bl.map((_,j)=>R.filter(x=>x.v==v&&x.kw>=bins[j]&&(j==bins.length-1||x.kw<bins[j+1])).length)}))});
+ const H={};R.forEach(x=>{const k=x.dow+'_'+x.h;H[k]=(H[k]||0)+1});const hd=[];let mx=1;for(let d=0;d<7;d++)for(let h=0;h<24;h++){const v=H[d+'_'+h]||0;mx=Math.max(mx,v);hd.push([h,d,v])}
+ C.cH.setOption({...base,grid:{left:40,right:10,top:10,bottom:50},tooltip:{trigger:'item',formatter:p=>`${DOW[p.value[1]]} ${p.value[0]}:00 · ${p.value[2]} sessions`,backgroundColor:'#1d2024',borderColor:'#333',textStyle:{color:'#e8e9eb'}},xAxis:{type:'category',data:[...Array(24).keys()],...ax},yAxis:{type:'category',data:DOW,...ax},
+  visualMap:{min:0,max:mx,show:false,inRange:{color:['#1a1c20','#5a1a1c','#e82127']}},series:[{type:'heatmap',data:hd,itemStyle:{borderColor:'#16181c',borderWidth:2,borderRadius:3}}]});
+ table(R)}
+function table(R){const r=[...R].sort((a,b)=>{const x=a[sortK]??-1,y=b[sortK]??-1;return(x>y?1:x<y?-1:0)*sortD}).slice(0,500);
+ $('tb').innerHTML=r.map(x=>`<tr><td>${new Date(x.s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</td><td>${x.v}</td><td><span style="color:${COL[x.net]||'#888'}">●</span> ${x.net}</td><td>${x.site}</td><td>${fm(x.kwh,1)}</td><td>${x.cost==null?'–':'$'+fm(x.cost,2)}</td><td>${x.ppk==null?'–':'$'+fm(x.ppk,2)}</td><td>${fm(x.kw,1)}</td><td>${fm(x.d)}</td></tr>`).join('')}
+</script></body></html>
