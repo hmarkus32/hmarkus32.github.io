@@ -1,1 +1,60 @@
-PLACEHOLDER
+name: Update EV Dashboard Data
+
+on:
+  schedule:
+    # Every 2 hours. Adjust as desired (e.g. '0 * * * *' for hourly).
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_SECRETS_PAT || github.token }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run data update
+        env:
+          TESLA_CLIENT_ID: ${{ secrets.TESLA_CLIENT_ID }}
+          TESLA_REFRESH_TOKEN: ${{ secrets.TESLA_REFRESH_TOKEN }}
+          RIVIAN_APP_SESSION_TOKEN: ${{ secrets.RIVIAN_APP_SESSION_TOKEN }}
+          RIVIAN_USER_SESSION_TOKEN: ${{ secrets.RIVIAN_USER_SESSION_TOKEN }}
+          RIVIAN_CSRF_TOKEN: ${{ secrets.RIVIAN_CSRF_TOKEN }}
+          VEHICLE_NAMES: ${{ secrets.VEHICLE_NAMES }}
+        run: python scripts/update_ev_data.py
+
+      - name: Update Tesla refresh token secret
+        if: always() && hashFiles('new_tesla_refresh_token.txt') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECRETS_PAT }}
+        run: |
+          if [ -f new_tesla_refresh_token.txt ]; then
+            NEW=$(cat new_tesla_refresh_token.txt)
+            echo "Updating TESLA_REFRESH_TOKEN secret"
+            gh secret set TESLA_REFRESH_TOKEN --body "$NEW" --repo ${{ github.repository }}
+            rm -f new_tesla_refresh_token.txt
+          fi
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ev/data.json
+          if git diff --cached --quiet; then
+            echo "No changes to data.json"
+          else
+            git commit -m "chore: update EV charging data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
