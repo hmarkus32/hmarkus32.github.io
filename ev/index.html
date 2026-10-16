@@ -55,7 +55,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 const $=id=>document.getElementById(id),DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 100+',100,1e9]];
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
-const COL={'Tesla Supercharger':'#e82127','Rivian Adventure Network':'#f2a900','Workplace – Weave':'#3e8ef7','Workplace – Qualtrics':'#22c4a8','Other':'#888'};
+const COL={'Tesla Supercharger':'#e82127','Rivian Adventure Network':'#f2a900','Workplace – Weave':'#3e8ef7','Workplace – Qualtrics':'#22c4a8','Home':'#9aa3b0','Other':'#888'};
 const VCOL=['#e8e9eb','#9aa3b0','#f2a900','#3e8ef7'];
 let S=[],F={v:new Set,n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
 const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
