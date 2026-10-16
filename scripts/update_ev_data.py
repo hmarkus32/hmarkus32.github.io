@@ -134,7 +134,28 @@ def normalize(tesla_rows, rivian_rows):
         veh = VNAME.get(x.get("vin"), "Tesla …" + x.get("vin", "")[-6:]) if x.get("vehicleMakeType") == "TSLA" else VNAME["R"]
         if veh == VNAME["R"]:
             ntsla.append((st, en))
-        add(out, veh, st, en, x.get("siteLocationName") or "Unknown Supercharger", "Tesla Supercharger", kwh, cost, "tesla")
+
+        # Classify Tesla sessions by power and time
+        dur_h = max((en - st).total_seconds() / 3600, 1e-3)
+        kw = kwh / dur_h
+        loc = st.astimezone(MT) if st.utcoffset() is None else st
+        is_day = 6 <= loc.hour < 18
+
+        if kwh < 2:
+            # Home charging at 10¢/kWh
+            site, net, cost = "Home", "Home", round(kwh * 0.10, 2)
+        elif 7 < kw < 30:
+            site, net = "Qualtrics Provo", "Workplace – Qualtrics"
+        elif 2 < kw < 7:
+            if is_day:
+                site, net = "Qualtrics Provo", "Workplace – Qualtrics"
+            else:
+                site, net = "Weave Lehi", "Workplace – Weave"
+        else:
+            site = x.get("siteLocationName") or "Unknown Supercharger"
+            net = "Tesla Supercharger"
+
+        add(out, veh, st, en, site, net, kwh, cost, "tesla")
 
     dupes = 0
     for r in rivian_rows:
