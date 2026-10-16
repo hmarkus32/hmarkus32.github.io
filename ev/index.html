@@ -7,7 +7,7 @@
 *{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
 header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px;width:100%}
 .logo-title{display:flex;align-items:center;gap:10px}
-.logo{width:32px;height:32px;flex-shrink:0;object-fit:contain}
+.logo{width:32px;height:32px;flex-shrink:0}
 h1{font-weight:700;font-size:24px;margin:0;letter-spacing:-.3px;color:var(--ac)}
 #upd{color:var(--mu);font-size:12px}
 .filters-wrap{position:sticky;top:0;z-index:5;background:rgba(12,13,15,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);width:100%}
@@ -61,7 +61,9 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 </style></head><body>
 <header>
   <div class="logo-title">
-    <img class="logo" src="logo.png" alt="Rivian">
+    <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#FFB100" d="M50 4 L94 50 L50 96 L6 50 Z M50 20 L76 50 L50 80 L24 50 Z M50 36 L60 50 L50 64 L40 50 Z"/>
+    </svg>
     <h1>Reba</h1>
   </div>
   <span id="upd"></span>
