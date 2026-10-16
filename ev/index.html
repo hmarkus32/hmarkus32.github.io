@@ -1,28 +1,29 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23e82127' d='M13 2 4 14h7l-1 8 9-12h-7z'/%3E%3C/svg%3E"><title>EV Charging</title><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
 :root{--bg:#0b0c0e;--card:#16181c;--line:#24272d;--tx:#e8e9eb;--mu:#8a8f98;--ac:#e82127}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-tap-highlight-color:transparent}
-header{display:flex;justify-content:space-between;align-items:baseline;padding:16px 16px 8px}h1{font-weight:500;font-size:22px;margin:0;letter-spacing:.5px}
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-tap-highlight-color:transparent}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:16px 16px 8px;width:100%}
+h1{font-weight:500;font-size:22px;margin:0;letter-spacing:.5px}
 #upd{color:var(--mu);font-size:12px}
-.filters-wrap{position:sticky;top:0;z-index:5;background:rgba(11,12,14,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.filters-wrap{position:sticky;top:0;z-index:5;background:rgba(11,12,14,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);width:100%}
 .filters-toggle{width:100%;background:none;border:none;color:var(--tx);padding:10px 16px;font:inherit;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .filters-toggle:active{background:#1a1c20}
-.filters{display:none;flex-wrap:wrap;gap:12px;padding:0 12px 16px}.filters.open{display:flex}
+.filters{display:none;flex-wrap:wrap;gap:12px;padding:0 12px 16px;width:100%}.filters.open{display:flex}
 .f{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 140px}.f label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px}
 select,input{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;min-width:0;width:100%}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{background:var(--card);border:1px solid var(--line);color:var(--mu);border-radius:16px;padding:8px 14px;cursor:pointer;font-size:13px;user-select:none}
 .chip.on{color:var(--tx);border-color:#555;background:#22252b}
 button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:10px;padding:10px 16px;cursor:pointer;align-self:flex-end;font:inherit}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:none;box-sizing:border-box}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
 .kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%}.kpi b{display:block;font-size:22px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums}.kpi span{color:var(--mu);font-size:12px}
 .kpi:nth-child(5){grid-column:1/-1}
-.grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;box-sizing:border-box}
-.card{background:var(--card);border-radius:14px;padding:12px}.card h3{margin:0 0 8px;font-weight:500;font-size:13px;color:var(--mu)}
-.ch{height:260px}.wide{grid-column:1/-1}
+.grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
+.card{background:var(--card);border-radius:14px;padding:12px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}.card h3{margin:0 0 8px;font-weight:500;font-size:13px;color:var(--mu)}
+.ch{height:220px;width:100%;max-width:100%}.wide{grid-column:1/-1}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{color:var(--mu);font-weight:500;text-align:left;cursor:pointer;position:sticky;top:0;background:var(--card);padding:10px 6px;border-bottom:1px solid var(--line)}
-td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch}
+td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 @media(min-width:700px){
   .kpis{grid-template-columns:repeat(5,1fr);padding:16px 24px}
   .kpi:nth-child(5){grid-column:auto}
@@ -61,8 +62,9 @@ const COL={'Tesla Supercharger':'#e82127','Rivian Adventure Network':'#f2a900','
 const VCOL=['#e8e9eb','#9aa3b0','#f2a900','#3e8ef7'];
 let S=[],F={v:new Set,n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
 const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
-addEventListener('resize',()=>Object.values(C).forEach(c=>c.resize()));
-const base={backgroundColor:'transparent',textStyle:{color:'#8a8f98'},animationDuration:500,animationDurationUpdate:600,animationEasingUpdate:'cubicInOut',grid:{left:48,right:48,top:28,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1d2024',borderColor:'#333',textStyle:{color:'#e8e9eb'}}};
+function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
+addEventListener('resize',resizeCharts);
+const base={backgroundColor:'transparent',textStyle:{color:'#8a8f98'},animationDuration:500,animationDurationUpdate:600,animationEasingUpdate:'cubicInOut',grid:{left:36,right:36,top:28,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1d2024',borderColor:'#333',textStyle:{color:'#e8e9eb'}}};
 const ax={axisLine:{lineStyle:{color:'#333'}},splitLine:{lineStyle:{color:'#1f2226'}}};
 function chips(id,items,set){const el=$(id);items.forEach(it=>{const c=document.createElement('span');c.className='chip';c.textContent=it;c.onclick=()=>{set.has(it)?set.delete(it):set.add(it);c.classList.toggle('on');render()};el.appendChild(c)})}
 function preset(days){const t=new Date();$('d1').value='';$('d0').value=days?new Date(t-days*864e5).toISOString().slice(0,10):'';render()}
@@ -74,7 +76,7 @@ fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;$('upd'
  ['fl','d0','d1','c0','c1'].forEach(i=>$(i).oninput=render);
  $('rst').onclick=()=>{Object.values(F).forEach(s=>s.clear());document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));['fl','d0','d1','c0','c1'].forEach(i=>$(i).value='');render()};
  const cols=[['s','Start'],['v','Vehicle'],['net','Network'],['site','Location'],['kwh','kWh'],['cost','Cost'],['ppk','$/kWh'],['kw','Avg kW'],['d','Min']];
- cols.forEach(([k,l])=>{const th=document.createElement('th');th.textContent=l;th.onclick=()=>{sortD=sortK==k?-sortD:-1;sortK=k;table(cur)};$('th').appendChild(th)});render()});
+ cols.forEach(([k,l])=>{const th=document.createElement('th');th.textContent=l;th.onclick=()=>{sortD=sortK==k?-sortD:-1;sortK=k;table(cur)};$('th').appendChild(th)});render();setTimeout(resizeCharts,100)});
 const inB=(B,lbls,v)=>!lbls.size||B.some(b=>lbls.has(b[0])&&v>=b[1]&&v<b[2]);
 let cur=[];
 function filt(){const l=$('fl').value,d0=$('d0').value,d1=$('d1').value,c0=parseFloat($('c0').value),c1=parseFloat($('c1').value);
@@ -85,7 +87,7 @@ function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.f
  $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';
  const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
  const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
- C.cT.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0,left:'center'},grid:{left:48,right:52,top:44,bottom:28},graphic:R.length&&!R.some(x=>x.cost)?[{type:'text',left:'center',top:'middle',style:{text:'No paid sessions in this selection',fill:'#555',fontSize:13}}]:[],xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
+ C.cT.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0,left:'center'},grid:{left:36,right:40,top:44,bottom:28},graphic:R.length&&!R.some(x=>x.cost)?[{type:'text',left:'center',top:'middle',style:{text:'No paid sessions in this selection',fill:'#555',fontSize:13}}]:[],xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
   series:[{name:'Spend',type:'bar',data:ks.map(k=>+M[k].c.toFixed(2)),barMinHeight:2,itemStyle:{color:'#e82127',borderRadius:[3,3,0,0]}},{name:'kWh',type:'line',yAxisIndex:1,smooth:true,symbol:'none',data:ks.map(k=>+M[k].e.toFixed(1)),lineStyle:{color:'#e8e9eb',width:2},areaStyle:{color:'rgba(232,233,235,.06)'}}]},{replaceMerge:['xAxis']});
  const N={};R.forEach(x=>{N[x.net]=N[x.net]||{k:0,c:0,n:0};N[x.net].k+=x.kwh;N[x.net].c+=x.cost||0;N[x.net].n++});
  const nets=Object.keys(N), totalK=nets.reduce((a,n)=>a+N[n].k,0)||1;
@@ -94,11 +96,11 @@ function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.f
   xAxis:{type:'value',max:totalK,show:false},yAxis:{type:'category',data:[''],show:false},
   series:nets.map(n=>({name:n,type:'bar',stack:'n',barWidth:40,itemStyle:{color:COL[n]||'#888',borderRadius:4},data:[+N[n].k.toFixed(1)],label:{show:N[n].k/totalK>0.08,position:'inside',color:'#fff',formatter:p=>fm(p.value,0)+' kWh'}}))});
  const L={};R.forEach(x=>{L[x.site]=L[x.site]||{k:0,c:0};L[x.site].k+=x.kwh;L[x.site].c+=x.cost||0});const lt=Object.entries(L).sort((a,b)=>b[1].k-a[1].k).slice(0,10).reverse();
- const sn=n=>{const m=n.match(/^([^,]+),\s*([A-Z]{2})\b/);if(m)return m[1].trim()+', '+m[2];return n.length>22?n.slice(0,21)+'…':n};
- C.cL.setOption({...base,grid:{left:150,right:20,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value,1)} kWh · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',name:'kWh',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:140,overflow:'truncate'}},series:[{type:'bar',data:lt.map(x=>+x[1].k.toFixed(1)),itemStyle:{color:'#3e8ef7',borderRadius:[0,3,3,0]},barMaxWidth:18}]});
+ const sn=n=>{const m=n.match(/^([^,]+),\s*([A-Z]{2})\b/);if(m)return m[1].trim()+', '+m[2];return n.length>18?n.slice(0,17)+'…':n};
+ C.cL.setOption({...base,grid:{left:110,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value,1)} kWh · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',name:'kWh',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:100,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:lt.map(x=>+x[1].k.toFixed(1)),itemStyle:{color:'#3e8ef7',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
  const bins=[0,5,7,10,20,50,75,100,150,250],bl=bins.map((b,i)=>i<bins.length-1?`${b}–${bins[i+1]}`:`${b}+`),vs=[...new Set(S.map(x=>x.v))];
- C.cS.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0},xAxis:{type:'category',data:bl,name:'kW',...ax},yAxis:{type:'value',...ax},series:vs.map((v,i)=>({name:v,type:'bar',stack:'s',itemStyle:{color:VCOL[i%4]},data:bl.map((_,j)=>R.filter(x=>x.v==v&&x.kw>=bins[j]&&(j==bins.length-1||x.kw<bins[j+1])).length)}))});
- table(R)}
+ C.cS.setOption({...base,legend:{textStyle:{color:'#8a8f98'},top:0},xAxis:{type:'category',data:bl,name:'kW',...ax,axisLabel:{fontSize:10}},yAxis:{type:'value',...ax},series:vs.map((v,i)=>({name:v,type:'bar',stack:'s',itemStyle:{color:VCOL[i%4]},data:bl.map((_,j)=>R.filter(x=>x.v==v&&x.kw>=bins[j]&&(j==bins.length-1||x.kw<bins[j+1])).length)}))});
+ table(R);setTimeout(resizeCharts,50)}
 function table(R){const r=[...R].sort((a,b)=>{const x=a[sortK]??-1,y=b[sortK]??-1;return(x>y?1:x<y?-1:0)*sortD}).slice(0,500);
  $('tb').innerHTML=r.map(x=>`<tr><td>${new Date(x.s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</td><td>${x.v}</td><td><span style="color:${COL[x.net]||'#888'}">●</span> ${x.net}</td><td>${x.site}</td><td>${fm(x.kwh,1)}</td><td>${x.cost==null?'–':'$'+fm(x.cost,2)}</td><td>${x.ppk==null?'–':'$'+fm(x.ppk,2)}</td><td>${fm(x.kw,1)}</td><td>${fm(x.d)}</td></tr>`).join('')}
 </script></body></html>
