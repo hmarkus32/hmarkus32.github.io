@@ -22,7 +22,7 @@ select,input{background:var(--card);color:var(--tx);border:1px solid var(--line)
 button.reset{background:none;border:1px solid var(--line);color:var(--mu);border-radius:10px;padding:10px 16px;cursor:pointer;align-self:flex-end;font:inherit}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;width:100%;max-width:100%;box-sizing:border-box}
 .kpi{background:var(--card);border-radius:14px;padding:14px;min-width:0;width:100%;border:1px solid #1f2226}.kpi b{display:block;font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ac)}.kpi span{color:var(--mu);font-size:12px;font-weight:500}
-.kpi:nth-child(5){grid-column:1/-1}
+.kpi:nth-child(5),.kpi:nth-child(6){grid-column:1/-1}
 .snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226}
 .snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .snake-header h3{margin:0;font-size:16px;font-weight:600;color:var(--tx)}
@@ -48,13 +48,16 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}th{color:var(--mu);font-weight:600;text-align:left;cursor:pointer;position:sticky;top:0;background:var(--card);padding:10px 6px;border-bottom:1px solid var(--line)}
 td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 @media(min-width:700px){
-  .kpis{grid-template-columns:repeat(5,1fr);padding:16px 24px}
-  .kpi:nth-child(5){grid-column:auto}
+  .kpis{grid-template-columns:repeat(3,1fr);padding:16px 24px}
+  .kpi:nth-child(5),.kpi:nth-child(6){grid-column:auto}
   .grid{grid-template-columns:repeat(2,1fr);padding:0 24px 16px}
   .filters{padding:0 24px 16px}
   header{padding:20px 24px 4px}
   .ch{height:280px}
   .snake-card{margin:0 24px 20px}
+}
+@media(min-width:1000px){
+  .kpis{grid-template-columns:repeat(6,1fr)}
 }
 </style></head><body>
 <header>
@@ -76,7 +79,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="f"><label>Time of day</label><div class="chips" id="ft"></div></div>
 <button class="reset" id="rst">Reset</button>
 </div></div>
-<div class="kpis"><div class="kpi"><span>Sessions</span><b id="k1"></b></div><div class="kpi"><span>Energy</span><b id="k2"></b></div><div class="kpi"><span>Spend</span><b id="k3"></b></div><div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div><div class="kpi"><span>Avg power</span><b id="k5"></b></div></div>
+<div class="kpis"><div class="kpi"><span>Sessions</span><b id="k1"></b></div><div class="kpi"><span>Energy</span><b id="k2"></b></div><div class="kpi"><span>Spend</span><b id="k3"></b></div><div class="kpi"><span>Avg $/kWh</span><b id="k4"></b></div><div class="kpi"><span>Avg power</span><b id="k5"></b></div><div class="kpi"><span>Gas saved</span><b id="k6"></b></div></div>
 <div class="snake-card">
   <div class="snake-header">
     <h3>Falcon 9 Recovery</h3>
@@ -124,6 +127,15 @@ const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,1
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
 const MARKERS=[{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
+const MI_PER_KWH=2.4;
+const GAS_MPG=20;
+const GAS_PRICE={
+  '2023-01':3.65,'2023-02':3.93,'2023-03':4.10,'2023-04':4.15,'2023-05':4.19,'2023-06':4.10,'2023-07':4.01,'2023-08':4.22,'2023-09':4.58,'2023-10':4.43,'2023-11':3.89,'2023-12':3.51,
+  '2024-01':3.35,'2024-02':3.52,'2024-03':3.82,'2024-04':4.16,'2024-05':4.00,'2024-06':3.73,'2024-07':3.70,'2024-08':3.69,'2024-09':3.68,'2024-10':3.55,'2024-11':3.39,'2024-12':3.30,
+  '2025-01':3.31,'2025-02':3.48,'2025-03':3.44,'2025-04':3.58,'2025-05':3.54,'2025-06':3.49,'2025-07':3.44,'2025-08':3.49,'2025-09':3.65,'2025-10':3.56,'2025-11':3.52,'2025-12':3.17,
+  '2026-01':3.06,'2026-02':3.25,'2026-03':4.21,'2026-04':4.69,'2026-05':4.95,'2026-06':4.51,'2026-07':4.32,'2026-08':4.56,'2026-09':4.86,'2026-10':4.70
+};
+function gasPrice(day){const m=day.slice(0,7);return GAS_PRICE[m]||4.0;}
 let S=[],F={n:new Set,s:new Set,d:new Set,t:new Set},sortK='s',sortD=-1;
 const C={};['cT','cN','cL','cS'].forEach(k=>C[k]=echarts.init($(k),null,{renderer:'canvas'}));
 function resizeCharts(){Object.values(C).forEach(c=>c.resize())}
@@ -158,7 +170,9 @@ function updateSnake(kwh){
   MARKERS.forEach(m=>{const el=$(m.id);el.classList.toggle('reached',pct*100>=m.pct)});
 }
 function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),paid=R.filter(x=>x.cost!=null),cost=paid.reduce((a,x)=>a+x.cost,0),pk=paid.reduce((a,x)=>a+x.kwh,0),hrs=R.reduce((a,x)=>a+x.d/60,0);
- $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';
+ let saved=0;
+ R.forEach(x=>{const miles=x.kwh*MI_PER_KWH;const gas=(miles/GAS_MPG)*gasPrice(x.day);const elec=x.cost||0;saved+=gas-elec;});
+ $('k1').textContent=fm(R.length);$('k2').textContent=fm(kwh)+' kWh';$('k3').textContent='$'+fm(cost,2);$('k4').textContent=pk?'$'+fm(cost/pk,3):'–';$('k5').textContent=hrs?fm(kwh/hrs,1)+' kW':'–';$('k6').textContent='$'+fm(saved,0);
  updateSnake(kwh);
  const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
  const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
