@@ -93,7 +93,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="snake-card">
   <div class="snake-header">
     <h3>Falcon 9 Recovery</h3>
-    <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat. Roughly the same as a 747 climbing to cruise.</span></button>
+    <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat.</span></button>
   </div>
   <div class="snake-wrap" id="snakeWrap">
     <svg class="snake-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -110,7 +110,6 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
       <line class="snake-dot" x1="350" y1="100" x2="350" y2="135"/>
       <line class="snake-dot" x1="150" y1="100" x2="150" y2="135"/>
       <line class="snake-dot" x1="480" y1="170" x2="480" y2="205"/>
-      <line class="snake-dot" x1="520" y1="170" x2="520" y2="205"/>
     </svg>
     <div class="snake-marker" id="mHome" style="left:13%;top:8%">
       <div class="i-icon">i<span class="info-tooltip">Typical US home for a year (~10,000 kWh)</span></div>
@@ -126,9 +125,6 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     </div>
     <div class="snake-marker" id="m3" style="left:80%;top:88%">
       <div class="i-icon">i<span class="info-tooltip">Landing burn: final slowdown so the booster can be caught or land softly</span></div>
-    </div>
-    <div class="snake-marker" id="m747" style="left:87%;top:88%">
-      <div class="i-icon">i<span class="info-tooltip">Delta 747 climb to cruise (~180,000 kWh of jet fuel energy)</span></div>
     </div>
   </div>
   <div class="snake-stats">
@@ -149,7 +145,7 @@ const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
-const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:95},{id:'m747',pct:100}];
+const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
 const MI_PER_KWH=2.4;
 const GAS_MPG=20;
 const GAS_PRICE={
