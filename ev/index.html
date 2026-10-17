@@ -148,7 +148,7 @@ const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
-const MARKERS=[{id:'mESB',pct:3},{id:'mHome',pct:6},{id:'mToT',pct:26},{id:'m1',pct:50},{id:'mWDW',pct:66},{id:'m2',pct:83},{id:'m3',pct:100}];
+const MARKERS=[{id:'mESB',pct:8},{id:'mHome',pct:14},{id:'mToT',pct:28},{id:'m1',pct:50},{id:'mWDW',pct:66},{id:'m2',pct:83},{id:'m3',pct:100}];
 const MI_PER_KWH=2.4;
 const GAS_MPG=20;
 const GAS_PRICE={
@@ -183,7 +183,6 @@ function placeMarkers(){
   if(!path||!wrap)return;
   const len=path.getTotalLength();
   const vb=path.ownerSVGElement.viewBox.baseVal;
-  const rect=wrap.getBoundingClientRect();
   MARKERS.forEach(m=>{
     const el=$(m.id);
     if(!el)return;
