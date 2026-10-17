@@ -43,9 +43,11 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .snake-dot{stroke:#3a3e44;stroke-width:1.5;stroke-dasharray:3 3;fill:none;vector-effect:non-scaling-stroke}
 .snake-marker{position:absolute;transform:translate(-50%,-50%);z-index:3}
 .snake-marker .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
-.snake-marker.reached .i-icon{border-color:var(--ac);color:var(--ac)}
+.snake-marker.reached .i-icon,.snake-marker.open .i-icon{border-color:var(--ac);color:var(--ac)}
 .snake-marker .info-tooltip{display:none;width:min(220px,calc(100vw - 64px));top:22px;left:50%;transform:translateX(-50%);text-align:center;z-index:21}
 .snake-marker.open .info-tooltip,.snake-marker .i-icon:hover .info-tooltip{display:block}
+.snake-marker.edge-left .info-tooltip{left:0;transform:none;text-align:left}
+.snake-marker.edge-right .info-tooltip{left:auto;right:0;transform:none;text-align:right}
 .snake-stats{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:13px}
 .snake-stats b{color:var(--ac);font-variant-numeric:tabular-nums}
 .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
@@ -111,9 +113,9 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
       <line class="snake-dot" x1="300" y1="130" x2="300" y2="165"/>
       <line class="snake-dot" x1="180" y1="220" x2="180" y2="255"/>
       <line class="snake-dot" x1="320" y1="220" x2="320" y2="255"/>
-      <line class="snake-dot" x1="540" y1="220" x2="540" y2="255"/>
+      <line class="snake-dot" x1="550" y1="220" x2="550" y2="255"/>
     </svg>
-    <div class="snake-marker" id="mESB" style="left:15%;top:12%">
+    <div class="snake-marker edge-left" id="mESB" style="left:15%;top:12%">
       <div class="i-icon">i<span class="info-tooltip"><b>~5,000 kWh</b><br>Empire State Building for one hour</span></div>
     </div>
     <div class="snake-marker" id="mHome" style="left:30%;top:12%">
@@ -131,7 +133,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     <div class="snake-marker" id="m2" style="left:53%;top:82%">
       <div class="i-icon">i<span class="info-tooltip"><b>~143,000 kWh</b><br>Reentry burn: protects the booster from heating and structural loads as it hits the atmosphere</span></div>
     </div>
-    <div class="snake-marker" id="m3" style="left:90%;top:82%">
+    <div class="snake-marker edge-right" id="m3" style="left:93%;top:82%">
       <div class="i-icon">i<span class="info-tooltip"><b>172,000 kWh</b><br>Landing burn: final slowdown so the booster can be caught or land softly</span></div>
     </div>
   </div>
