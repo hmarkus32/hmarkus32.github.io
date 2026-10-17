@@ -111,11 +111,11 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
       <line class="snake-dot" x1="150" y1="100" x2="150" y2="135"/>
       <line class="snake-dot" x1="480" y1="170" x2="480" y2="205"/>
     </svg>
-    <div class="snake-marker" id="mHome" style="left:13%;top:8%">
-      <div class="i-icon">i<span class="info-tooltip">Typical US home for a year (~10,000 kWh)</span></div>
-    </div>
-    <div class="snake-marker" id="mESB" style="left:33%;top:8%">
+    <div class="snake-marker" id="mESB" style="left:13%;top:8%">
       <div class="i-icon">i<span class="info-tooltip">Empire State Building for one hour (~5,000 kWh)</span></div>
+    </div>
+    <div class="snake-marker" id="mHome" style="left:33%;top:8%">
+      <div class="i-icon">i<span class="info-tooltip">Typical US home for a year (~10,000 kWh)</span></div>
     </div>
     <div class="snake-marker" id="m1" style="left:58%;top:55%">
       <div class="i-icon">i<span class="info-tooltip">Boostback burn: flips the booster and slows it so it returns toward the landing zone</span></div>
@@ -145,7 +145,7 @@ const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
-const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
+const MARKERS=[{id:'mESB',pct:3},{id:'mHome',pct:6},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
 const MI_PER_KWH=2.4;
 const GAS_MPG=20;
 const GAS_PRICE={
