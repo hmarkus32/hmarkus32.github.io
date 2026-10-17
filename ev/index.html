@@ -36,11 +36,11 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .info-btn:hover .i-icon,.info-btn.open .i-icon{border-color:var(--ac);color:var(--ac)}
 .info-tooltip{display:none;position:absolute;left:0;top:24px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:min(280px,calc(100vw - 48px));z-index:20;line-height:1.4;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .info-btn:hover .info-tooltip,.info-btn.open .info-tooltip{display:block}
-.snake-wrap{position:relative;width:100%;height:220px;margin:8px 0;overflow:visible}
+.snake-wrap{position:relative;width:100%;height:280px;margin:8px 0 16px;overflow:visible}
 .snake-svg{width:100%;height:100%;overflow:visible}
-.snake-path{fill:none;stroke:#25282d;stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
-.snake-fill{fill:none;stroke:url(#snakeGrad);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .6s ease}
-.snake-dot{stroke:#3a3e44;stroke-width:1.5;stroke-dasharray:3 3;fill:none}
+.snake-path{fill:none;stroke:#25282d;stroke-width:14;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.snake-fill{fill:none;stroke:url(#snakeGrad);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;transition:stroke-dashoffset .6s ease}
+.snake-dot{stroke:#3a3e44;stroke-width:1.5;stroke-dasharray:3 3;fill:none;vector-effect:non-scaling-stroke}
 .snake-marker{position:absolute;transform:translate(-50%,-50%);z-index:3}
 .snake-marker .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .snake-marker.reached .i-icon{border-color:var(--ac);color:var(--ac)}
@@ -96,42 +96,42 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat.</span></button>
   </div>
   <div class="snake-wrap" id="snakeWrap">
-    <svg class="snake-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+    <svg class="snake-svg" viewBox="0 0 600 260" preserveAspectRatio="none">
       <defs>
         <linearGradient id="snakeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stop-color="#FFB100"/>
           <stop offset="100%" stop-color="#ffc933"/>
         </linearGradient>
       </defs>
-      <path class="snake-path" id="snakePath" d="M40 55 H520 Q560 55 560 95 V105 Q560 145 520 145 H80 Q40 145 40 185 V195 Q40 235 80 235 H560"/>
-      <path class="snake-fill" id="snakeFill" d="M40 55 H520 Q560 55 560 95 V105 Q560 145 520 145 H80 Q40 145 40 185 V195 Q40 235 80 235 H560"/>
-      <line class="snake-dot" x1="90" y1="35" x2="90" y2="70"/>
-      <line class="snake-dot" x1="180" y1="35" x2="180" y2="70"/>
-      <line class="snake-dot" x1="380" y1="35" x2="380" y2="70"/>
-      <line class="snake-dot" x1="300" y1="125" x2="300" y2="160"/>
-      <line class="snake-dot" x1="180" y1="215" x2="180" y2="250"/>
-      <line class="snake-dot" x1="320" y1="215" x2="320" y2="250"/>
-      <line class="snake-dot" x1="480" y1="215" x2="480" y2="250"/>
+      <path class="snake-path" id="snakePath" d="M40 60 H520 Q560 60 560 100 V110 Q560 150 520 150 H80 Q40 150 40 190 V200 Q40 240 80 240 H560"/>
+      <path class="snake-fill" id="snakeFill" d="M40 60 H520 Q560 60 560 100 V110 Q560 150 520 150 H80 Q40 150 40 190 V200 Q40 240 80 240 H560"/>
+      <line class="snake-dot" x1="90" y1="40" x2="90" y2="75"/>
+      <line class="snake-dot" x1="180" y1="40" x2="180" y2="75"/>
+      <line class="snake-dot" x1="380" y1="40" x2="380" y2="75"/>
+      <line class="snake-dot" x1="300" y1="130" x2="300" y2="165"/>
+      <line class="snake-dot" x1="180" y1="220" x2="180" y2="255"/>
+      <line class="snake-dot" x1="320" y1="220" x2="320" y2="255"/>
+      <line class="snake-dot" x1="540" y1="220" x2="540" y2="255"/>
     </svg>
-    <div class="snake-marker" id="mESB" style="left:15%;top:10%">
+    <div class="snake-marker" id="mESB" style="left:15%;top:12%">
       <div class="i-icon">i<span class="info-tooltip"><b>~5,000 kWh</b><br>Empire State Building for one hour</span></div>
     </div>
-    <div class="snake-marker" id="mHome" style="left:30%;top:10%">
+    <div class="snake-marker" id="mHome" style="left:30%;top:12%">
       <div class="i-icon">i<span class="info-tooltip"><b>~10,000 kWh</b><br>Typical US home for a year</span></div>
     </div>
-    <div class="snake-marker" id="mToT" style="left:63%;top:10%">
+    <div class="snake-marker" id="mToT" style="left:63%;top:12%">
       <div class="i-icon">i<span class="info-tooltip"><b>~45,000 kWh</b><br>Peak Day at Tower of Terror</span></div>
     </div>
-    <div class="snake-marker" id="m1" style="left:50%;top:52%">
+    <div class="snake-marker" id="m1" style="left:50%;top:48%">
       <div class="i-icon">i<span class="info-tooltip"><b>~86,000 kWh</b><br>Boostback burn: flips the booster and slows it so it returns toward the landing zone</span></div>
     </div>
-    <div class="snake-marker" id="mWDW" style="left:30%;top:90%">
+    <div class="snake-marker" id="mWDW" style="left:30%;top:82%">
       <div class="i-icon">i<span class="info-tooltip"><b>~114,000 kWh</b><br>Entire Walt Disney World Resort for one hour</span></div>
     </div>
-    <div class="snake-marker" id="m2" style="left:53%;top:90%">
+    <div class="snake-marker" id="m2" style="left:53%;top:82%">
       <div class="i-icon">i<span class="info-tooltip"><b>~143,000 kWh</b><br>Reentry burn: protects the booster from heating and structural loads as it hits the atmosphere</span></div>
     </div>
-    <div class="snake-marker" id="m3" style="left:80%;top:90%">
+    <div class="snake-marker" id="m3" style="left:90%;top:82%">
       <div class="i-icon">i<span class="info-tooltip"><b>172,000 kWh</b><br>Landing burn: final slowdown so the booster can be caught or land softly</span></div>
     </div>
   </div>
