@@ -28,24 +28,24 @@ button.reset{background:none;border:1px solid var(--line);color:var(--mu);border
 .kpi.row1 b{color:var(--green)}
 .kpi.row3 b{color:var(--blue)}
 .kpi.full{grid-column:1/-1}
-.snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226}
-.snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.snake-card{background:var(--card);border-radius:14px;margin:0 12px 16px;padding:16px;border:1px solid #1f2226;overflow:visible;position:relative}
+.snake-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;position:relative}
 .snake-header h3{margin:0;font-size:16px;font-weight:600;color:var(--tx)}
 .info-btn{background:none;border:none;cursor:pointer;padding:0;position:relative}
 .info-btn .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
-.info-btn:hover .i-icon{border-color:var(--ac);color:var(--ac)}
-.info-tooltip{display:none;position:absolute;left:0;top:22px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:280px;z-index:10;line-height:1.4}
-.info-btn:hover .info-tooltip,.info-btn:focus .info-tooltip{display:block}
-.snake-wrap{position:relative;width:100%;height:220px;margin:8px 0}
+.info-btn:hover .i-icon,.info-btn.open .i-icon{border-color:var(--ac);color:var(--ac)}
+.info-tooltip{display:none;position:absolute;left:0;top:24px;background:#1c1e22;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx);width:min(280px,calc(100vw - 48px));z-index:20;line-height:1.4;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.info-btn:hover .info-tooltip,.info-btn.open .info-tooltip{display:block}
+.snake-wrap{position:relative;width:100%;height:220px;margin:8px 0;overflow:visible}
 .snake-svg{width:100%;height:100%;overflow:visible}
 .snake-path{fill:none;stroke:#25282d;stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
 .snake-fill{fill:none;stroke:url(#snakeGrad);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .6s ease}
 .snake-dot{stroke:#3a3e44;stroke-width:1.5;stroke-dasharray:3 3;fill:none}
-.snake-marker{position:absolute;transform:translate(-50%,-50%);z-index:2}
+.snake-marker{position:absolute;transform:translate(-50%,-50%);z-index:3}
 .snake-marker .i-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #3a3e44;background:#16181c;color:var(--mu);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .snake-marker.reached .i-icon{border-color:var(--ac);color:var(--ac)}
-.snake-marker .i-icon:hover .info-tooltip{display:block}
-.snake-marker .info-tooltip{width:180px;top:22px;left:50%;transform:translateX(-50%);text-align:center}
+.snake-marker .info-tooltip{display:none;width:min(200px,calc(100vw - 64px));top:22px;left:50%;transform:translateX(-50%);text-align:center;z-index:21}
+.snake-marker.open .info-tooltip,.snake-marker .i-icon:hover .info-tooltip{display:block}
 .snake-stats{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:13px}
 .snake-stats b{color:var(--ac);font-variant-numeric:tabular-nums}
 .grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 12px 20px;width:100%;max-width:100%;box-sizing:border-box}
@@ -93,7 +93,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
 <div class="snake-card">
   <div class="snake-header">
     <h3>Falcon 9 Recovery</h3>
-    <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat.</span></button>
+    <button class="info-btn" aria-label="Info"><div class="i-icon">i</div><span class="info-tooltip">Chemical energy in the RP-1 burned during the Falcon 9 first-stage recovery sequence (boostback, reentry, and landing burns). Most energy is lost as exhaust heat. Roughly the same as a 747 climbing to cruise.</span></button>
   </div>
   <div class="snake-wrap" id="snakeWrap">
     <svg class="snake-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -110,6 +110,7 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
       <line class="snake-dot" x1="350" y1="100" x2="350" y2="135"/>
       <line class="snake-dot" x1="150" y1="100" x2="150" y2="135"/>
       <line class="snake-dot" x1="480" y1="170" x2="480" y2="205"/>
+      <line class="snake-dot" x1="520" y1="170" x2="520" y2="205"/>
     </svg>
     <div class="snake-marker" id="mHome" style="left:13%;top:8%">
       <div class="i-icon">i<span class="info-tooltip">Typical US home for a year (~10,000 kWh)</span></div>
@@ -125,6 +126,9 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     </div>
     <div class="snake-marker" id="m3" style="left:80%;top:88%">
       <div class="i-icon">i<span class="info-tooltip">Landing burn: final slowdown so the booster can be caught or land softly</span></div>
+    </div>
+    <div class="snake-marker" id="m747" style="left:87%;top:88%">
+      <div class="i-icon">i<span class="info-tooltip">Delta 747 climb to cruise (~180,000 kWh of jet fuel energy)</span></div>
     </div>
   </div>
   <div class="snake-stats">
@@ -145,7 +149,7 @@ const SPEED=[['Slow <7kW',0,7],['L2 7–20',7,20],['DC 20–100',20,100],['Fast 
 const TOD=[['Night 0–6',0,6],['Morning 6–12',6,12],['Afternoon 12–18',12,18],['Evening 18–24',18,24]];
 const COL={'Rivian Adventure Network':'#FFB100','Workplace – Weave':'#5b8c9a','Workplace – Qualtrics':'#7d9b6a','Home':'#a8a39a','Tesla Supercharger':'#c45c4a','Other':'#888'};
 const ROCKET_TARGET=172000;
-const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:100}];
+const MARKERS=[{id:'mHome',pct:6},{id:'mESB',pct:3},{id:'m1',pct:50},{id:'m2',pct:83},{id:'m3',pct:95},{id:'m747',pct:100}];
 const MI_PER_KWH=2.4;
 const GAS_MPG=20;
 const GAS_PRICE={
@@ -164,6 +168,16 @@ const ax={axisLine:{lineStyle:{color:'#2a2e33'}},splitLine:{lineStyle:{color:'#1
 function chips(id,items,set){const el=$(id);items.forEach(it=>{const c=document.createElement('span');c.className='chip';c.textContent=it;c.onclick=()=>{set.has(it)?set.delete(it):set.add(it);c.classList.toggle('on');render()};el.appendChild(c)})}
 function preset(days){const t=new Date();$('d1').value='';$('d0').value=days?new Date(t-days*864e5).toISOString().slice(0,10):'';render()}
 $('ftog').onclick=()=>{const f=$('filters');f.classList.toggle('open');$('farrow').textContent=f.classList.contains('open')?'▲':'▼'};
+// Touch-friendly tooltips
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.info-btn');
+  const marker=e.target.closest('.snake-marker');
+  document.querySelectorAll('.info-btn.open,.snake-marker.open').forEach(el=>{
+    if(el!==btn&&el!==marker)el.classList.remove('open');
+  });
+  if(btn){btn.classList.toggle('open');e.stopPropagation();}
+  if(marker){marker.classList.toggle('open');e.stopPropagation();}
+});
 fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;ODO=j.odometer;VIN=j.vin;$('upd').textContent='Updated '+new Date(j.generated).toLocaleString();
  if(VIN)$('k7label').textContent='Odometer | '+VIN;
  chips('fn',[...new Set(S.map(x=>x.net))],F.n);chips('fs',SPEED.map(x=>x[0]),F.s);chips('fd',DOW,F.d);chips('ft',TOD.map(x=>x[0]),F.t);
