@@ -107,33 +107,26 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
       </defs>
       <path class="snake-path" id="snakePath" d="M40 60 H520 Q560 60 560 100 V110 Q560 150 520 150 H80 Q40 150 40 190 V200 Q40 240 80 240 H560"/>
       <path class="snake-fill" id="snakeFill" d="M40 60 H520 Q560 60 560 100 V110 Q560 150 520 150 H80 Q40 150 40 190 V200 Q40 240 80 240 H560"/>
-      <line class="snake-dot" x1="90" y1="40" x2="90" y2="75"/>
-      <line class="snake-dot" x1="180" y1="40" x2="180" y2="75"/>
-      <line class="snake-dot" x1="380" y1="40" x2="380" y2="75"/>
-      <line class="snake-dot" x1="300" y1="130" x2="300" y2="165"/>
-      <line class="snake-dot" x1="180" y1="220" x2="180" y2="255"/>
-      <line class="snake-dot" x1="320" y1="220" x2="320" y2="255"/>
-      <line class="snake-dot" x1="550" y1="220" x2="550" y2="255"/>
     </svg>
-    <div class="snake-marker edge-left" id="mESB" style="left:15%;top:12%">
+    <div class="snake-marker" id="mESB">
       <div class="i-icon">i<span class="info-tooltip"><b>~5,000 kWh</b><br>Empire State Building for one hour</span></div>
     </div>
-    <div class="snake-marker" id="mHome" style="left:30%;top:12%">
+    <div class="snake-marker" id="mHome">
       <div class="i-icon">i<span class="info-tooltip"><b>~10,000 kWh</b><br>Typical US home for a year</span></div>
     </div>
-    <div class="snake-marker" id="mToT" style="left:63%;top:12%">
+    <div class="snake-marker" id="mToT">
       <div class="i-icon">i<span class="info-tooltip"><b>~45,000 kWh</b><br>Peak Day at Tower of Terror</span></div>
     </div>
-    <div class="snake-marker" id="m1" style="left:50%;top:48%">
+    <div class="snake-marker" id="m1">
       <div class="i-icon">i<span class="info-tooltip"><b>~86,000 kWh</b><br>Boostback burn: flips the booster and slows it so it returns toward the landing zone</span></div>
     </div>
-    <div class="snake-marker" id="mWDW" style="left:30%;top:82%">
+    <div class="snake-marker" id="mWDW">
       <div class="i-icon">i<span class="info-tooltip"><b>~114,000 kWh</b><br>Entire Walt Disney World Resort for one hour</span></div>
     </div>
-    <div class="snake-marker" id="m2" style="left:53%;top:82%">
+    <div class="snake-marker" id="m2">
       <div class="i-icon">i<span class="info-tooltip"><b>~143,000 kWh</b><br>Reentry burn: protects the booster from heating and structural loads as it hits the atmosphere</span></div>
     </div>
-    <div class="snake-marker edge-right" id="m3" style="left:93%;top:82%">
+    <div class="snake-marker" id="m3">
       <div class="i-icon">i<span class="info-tooltip"><b>172,000 kWh</b><br>Landing burn: final slowdown so the booster can be caught or land softly</span></div>
     </div>
   </div>
@@ -184,6 +177,27 @@ document.addEventListener('click',e=>{
   if(btn){btn.classList.toggle('open');e.stopPropagation();}
   if(marker){marker.classList.toggle('open');e.stopPropagation();}
 });
+function placeMarkers(){
+  const path=$('snakeFill');
+  const wrap=$('snakeWrap');
+  if(!path||!wrap)return;
+  const len=path.getTotalLength();
+  const vb=path.ownerSVGElement.viewBox.baseVal;
+  const rect=wrap.getBoundingClientRect();
+  MARKERS.forEach(m=>{
+    const el=$(m.id);
+    if(!el)return;
+    const dist=Math.min(len-1,len*(m.pct/100));
+    const pt=path.getPointAtLength(dist);
+    const x=(pt.x/vb.width)*100;
+    const y=(pt.y/vb.height)*100;
+    el.style.left=x+'%';
+    el.style.top=y+'%';
+    el.classList.toggle('edge-left',x<20);
+    el.classList.toggle('edge-right',x>80);
+  });
+}
+addEventListener('resize',()=>{placeMarkers();resizeCharts()});
 fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;ODO=j.odometer;VIN=j.vin;$('upd').textContent='Updated '+new Date(j.generated).toLocaleString();
  if(VIN)$('k7label').textContent='Odometer | '+VIN;
  chips('fn',[...new Set(S.map(x=>x.net))],F.n);chips('fs',SPEED.map(x=>x[0]),F.s);chips('fd',DOW,F.d);chips('ft',TOD.map(x=>x[0]),F.t);
@@ -192,7 +206,7 @@ fetch('data.json?t='+Date.now()).then(r=>r.json()).then(j=>{S=j.sessions;ODO=j.o
  ['fl','d0','d1','c0','c1'].forEach(i=>$(i).oninput=render);
  $('rst').onclick=()=>{Object.values(F).forEach(s=>s.clear());document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));['fl','d0','d1','c0','c1'].forEach(i=>$(i).value='');render()};
  const cols=[['s','Start'],['net','Network'],['site','Location'],['kwh','kWh'],['cost','Cost'],['ppk','$/kWh'],['kw','Avg kW'],['d','Min']];
- cols.forEach(([k,l])=>{const th=document.createElement('th');th.textContent=l;th.onclick=()=>{sortD=sortK==k?-sortD:-1;sortK=k;table(cur)};$('th').appendChild(th)});render();setTimeout(resizeCharts,100)});
+ cols.forEach(([k,l])=>{const th=document.createElement('th');th.textContent=l;th.onclick=()=>{sortD=sortK==k?-sortD:-1;sortK=k;table(cur)};$('th').appendChild(th)});render();setTimeout(()=>{placeMarkers();resizeCharts()},100)});
 const inB=(B,lbls,v)=>!lbls.size||B.some(b=>lbls.has(b[0])&&v>=b[1]&&v<b[2]);
 let cur=[];
 function filt(){const l=$('fl').value,d0=$('d0').value,d1=$('d1').value,c0=parseFloat($('c0').value),c1=parseFloat($('c1').value);
