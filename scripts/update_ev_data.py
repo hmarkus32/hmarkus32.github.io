@@ -207,6 +207,7 @@ def normalize(rivian_rows):
     out = []
     vehicle_id = None
     SUPERCHARGER_RATE = 0.50  # assumed $/kWh when paidTotal missing for Tesla Supercharger
+    city_samples = []
     for r in rivian_rows:
         if not vehicle_id and r.get("vehicleId"):
             vehicle_id = r["vehicleId"]
@@ -222,6 +223,10 @@ def normalize(rivian_rows):
             is_home = r.get("isHomeCharger") is True or str(r.get("isHomeCharger")).lower() == "true"
             city = (r.get("city") or "").strip()
             txn = r.get("transactionId")
+
+            # Diagnostic: log city for non-public sessions (sample)
+            if not is_public and len(city_samples) < 15:
+                city_samples.append((city or "(empty)", round(kw,1), is_home, txn[:8] if txn else None))
 
             # Enrich missing city via detailed session (especially Superchargers)
             detailed_name = None
@@ -257,6 +262,11 @@ def normalize(rivian_rows):
         except Exception as e:
             print(f"Skip Rivian row: {e}")
             continue
+
+    if city_samples:
+        print("Non-public city samples (city, kw, is_home, txn):")
+        for s in city_samples:
+            print(" ", s)
 
     out.sort(key=lambda x: x["s"])
     odometer = fetch_odometer(vehicle_id) if vehicle_id else None
