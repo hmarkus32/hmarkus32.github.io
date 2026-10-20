@@ -170,6 +170,7 @@ def add(out, veh, st, en, site, net, kwh, cost, src):
 def normalize(rivian_rows):
     out = []
     vehicle_id = None
+    SUPERCHARGER_RATE = 0.50  # assumed $/kWh when paidTotal missing for Tesla Supercharger
     for r in rivian_rows:
         if not vehicle_id and r.get("vehicleId"):
             vehicle_id = r["vehicleId"]
@@ -194,6 +195,10 @@ def normalize(rivian_rows):
                 net, site = "Workplace – Qualtrics", "Qualtrics Provo"
             else:
                 net, site = "Workplace – Weave", "Weave Lehi"
+
+            # Assume $0.50/kWh for Tesla Superchargers when Rivian does not report a paidTotal
+            if net == "Tesla Supercharger" and cost is None and kwh > 0:
+                cost = round(SUPERCHARGER_RATE * kwh, 2)
 
             add(out, VNAME.get("R", "Reba"), st, en, site, net, kwh, cost, "rivian")
         except Exception as e:
