@@ -63,6 +63,42 @@ def fetch_rivian():
     print(f"{len(data)} Rivian sessions")
     return data
 
+def fetch_detailed_session(transaction_id):
+    """Fetch detailed session info including charger address/name. Returns dict or None."""
+    headers = get_headers()
+    if not headers or not transaction_id:
+        return None
+    query = {
+        "operationName": "GetDetailedSessionInfoByTxnId",
+        "variables": {"transactionId": transaction_id},
+        "query": """query GetDetailedSessionInfoByTxnId($transactionId: ID!) {
+            getDetailedSessionInfoByTxnId(transactionId: $transactionId) {
+                charger {
+                    address { city state country line1 line2 postalCode }
+                    name
+                    vendor
+                    isHomeCharger
+                }
+                summary { startInstant endInstant totalEnergyKwh transactionId }
+            }
+        }"""
+    }
+    try:
+        r = requests.post(
+            "https://rivian.com/api/gql/chrg/user/graphql",
+            headers=headers,
+            json=query,
+            timeout=20,
+        )
+        if r.status_code != 200:
+            print(f"Detailed fetch failed {r.status_code} for {transaction_id}")
+            return None
+        data = r.json().get("data", {}).get("getDetailedSessionInfoByTxnId")
+        return data
+    except Exception as e:
+        print(f"Detailed fetch error for {transaction_id}: {e}")
+        return None
+
 def fetch_odometer(vehicle_id):
     """Fetch current odometer in miles from vehicle state. Returns None on failure."""
     headers = get_headers()
@@ -184,13 +220,30 @@ def normalize(rivian_rows):
             cost = float(r["paidTotal"]) if r.get("paidTotal") else None
             is_public = r.get("isPublic") is True or str(r.get("isPublic")).lower() == "true"
             is_home = r.get("isHomeCharger") is True or str(r.get("isHomeCharger")).lower() == "true"
+            city = (r.get("city") or "").strip()
+            txn = r.get("transactionId")
+
+            # Enrich missing city via detailed session (especially Superchargers)
+            detailed_name = None
+            detailed_city = None
+            if not city and txn and (not is_public and not is_home):
+                detail = fetch_detailed_session(txn)
+                if detail and detail.get("charger"):
+                    ch = detail["charger"]
+                    detailed_name = (ch.get("name") or "").strip()
+                    addr = ch.get("address") or {}
+                    detailed_city = (addr.get("city") or "").strip()
+                    if detailed_name or detailed_city:
+                        print(f"Enriched {txn}: name={detailed_name!r} city={detailed_city!r}")
 
             if is_public:
-                net, site = "Rivian Adventure Network", (r.get("city") or "Unknown") + " RAN"
+                net = "Rivian Adventure Network"
+                site = (city or detailed_city or "Unknown") + " RAN"
             elif is_home:
                 net, site = "Home", "Home"
             elif kw > 30:
-                net, site = "Tesla Supercharger", r.get("city") or "Unknown Supercharger"
+                net = "Tesla Supercharger"
+                site = detailed_name or detailed_city or city or "Unknown Supercharger"
             elif 8 <= kw <= 11:
                 net, site = "Workplace – Qualtrics", "Qualtrics Provo"
             else:
