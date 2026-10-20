@@ -2,8 +2,8 @@ name: Update EV Dashboard Data
 
 on:
   schedule:
-    # Every 2 hours. Adjust as desired (e.g. '0 * * * *' for hourly).
-    - cron: '0 */2 * * *'
+    # Every 15 minutes. Adjust as desired.
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
