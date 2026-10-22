@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>Dashboard</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Dashboard">
+<meta name="theme-color" content="#0a0c10"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{--bg:#0a0c10;--card:#13161d;--line:#232833;--t:#eef1f6;--t2:#9aa3b2;--t3:#6b7385;--blue:#3e8cff;--cyan:#2fd3c4;--yel:#f5c542;--ok:#34d27b;--bad:#ff5d5d;--warn:#f5a524}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--t);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 28px);max-width:720px;margin:0 auto}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:8px 0 2px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:28px 0 10px;font-weight:600}
+.sub{color:var(--t2);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric .v{font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.metric .l{color:var(--t2);font-size:13px;margin-top:2px}.metric .d{color:var(--t3);font-size:11px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--t2);font:inherit;font-weight:600;transition:all .2s}
+.chip.on{background:var(--t);color:var(--bg);border-color:var(--t)}.chip:active{transform:scale(.96)}
+select{min-height:44px;width:100%;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit;padding:0 12px;-webkit-appearance:none;appearance:none}
+.row{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--line);animation:in .35s ease both}.row:first-child{border-top:0}
+.row .main{flex:1;min-width:0}.row .k{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}.row .t{font-weight:600;margin:2px 0}.row .d{color:var(--t2);font-size:13px}
+.amt{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap}.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;background:#222833;color:var(--t2);margin-top:4px}
+.pill.success{background:rgba(52,210,123,.15);color:var(--ok)}.pill.danger{background:rgba(255,93,93,.15);color:var(--bad)}.pill.warning{background:rgba(245,165,36,.15);color:var(--warn)}
+.chart{display:flex;gap:14px;align-items:flex-end;height:180px;padding-top:8px}.grp{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.bars{flex:1;width:100%;display:flex;gap:5px;align-items:flex-end;justify-content:center;position:relative}.bar{width:28%;border-radius:6px 6px 2px 2px;transition:height .6s cubic-bezier(.2,.8,.2,1);min-height:2px}
+.lab{font-size:12px;color:var(--t3)}.leg{display:flex;gap:14px;font-size:12px;color:var(--t2);margin-bottom:6px}.leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+.net{font-size:11px;font-variant-numeric:tabular-nums}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:9;transition:opacity .4s}
+#lock input{width:100%;max-width:320px;min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--t);font-size:20px;text-align:center;letter-spacing:.2em;margin:18px 0 10px}
+.btn{min-height:50px;width:100%;max-width:320px;border-radius:14px;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:700;font-size:16px}.btn:active{transform:scale(.98)}
+label.rem{display:flex;gap:10px;align-items:center;color:var(--t2);margin-top:14px;min-height:44px}label.rem input{width:22px;height:22px}
+#err{color:var(--bad);min-height:20px;font-size:13px;margin-top:8px}.link{background:none;border:0;color:var(--t3);font:inherit;min-height:44px;text-decoration:underline}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}#app{display:none}#app.show{display:block;animation:in .5s ease}
+details summary{min-height:44px;display:flex;align-items:center;color:var(--t2);cursor:pointer}
+</style></head><body>
+<div id="lock"><div style="font-size:22px;font-weight:700">Dashboard</div><div class="sub">Enter passcode</div>
+<input id="pw" type="password" autocomplete="current-password" inputmode="text" enterkeyhint="go">
+<button class="btn" id="go">Unlock</button><label class="rem"><input type="checkbox" id="rem">Remember on this device</label><div id="err"></div></div>
+<div id="app"></div>
+<script src="app.js"></script></body></html>
