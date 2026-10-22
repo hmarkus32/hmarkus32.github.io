@@ -69,7 +69,10 @@ td{padding:8px 6px;border-bottom:1px solid #1d2024}.tw{max-height:420px;overflow
     <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Rivian_Logo_Mark_Gold.png" alt="Rivian">
     <h1>REBA</h1>
   </div>
-  <span id="upd"></span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="upd"></span>
+    <button id="refreshBtn" title="Refresh data now" style="background:none;border:1px solid var(--line);color:var(--mu);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;line-height:1">↻</button>
+  </div>
 </header>
 <div class="filters-wrap">
 <button class="filters-toggle" id="ftog">Filters <span id="farrow">▼</span></button>
@@ -229,24 +232,55 @@ function draw(){const R=cur=filt();const kwh=R.reduce((a,x)=>a+x.kwh,0),cost=R.r
  updateSnake(kwh);
  const days=R.map(x=>x.day).sort(),span=days.length?(new Date(days.at(-1))-new Date(days[0]))/864e5:0,wk=span<120,key=x=>wk?x.day:x.day.slice(0,7);
  const M={};R.forEach(x=>{const k=key(x);M[k]=M[k]||{c:0,e:0};M[k].c+=x.cost||0;M[k].e+=x.kwh});const ks=Object.keys(M).sort();
- C.cT.setOption({...base,legend:{textStyle:{color:'#9aa0a6'},top:0,left:'center'},grid:{left:36,right:40,top:44,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4'},formatter:params=>{let s=params[0].axisValue+'<br>';params.forEach(p=>{const v=p.value;s+=p.marker+' '+p.seriesName+': '+(p.seriesName==='Spend'?'$'+fm(v,2):fm(v,1))+'<br>';});return s;}},xAxis:{type:'category',data:ks,...ax},yAxis:[{type:'value',name:'$',...ax},{type:'value',name:'kWh',...ax,splitLine:{show:false}}],
-  series:[{name:'Spend',type:'bar',data:ks.map(k=>+M[k].c.toFixed(2)),barMinHeight:2,itemStyle:{color:'#5b8c9a',borderRadius:[3,3,0,0]}},{name:'kWh',type:'line',yAxisIndex:1,smooth:true,symbol:'none',data:ks.map(k=>+M[k].e.toFixed(1)),itemStyle:{color:'#7d9b6a'},lineStyle:{color:'#FFB100',width:2},areaStyle:{color:'rgba(255,177,0,.08)'}}]},{replaceMerge:['xAxis']});
- const N={};R.forEach(x=>{N[x.net]=N[x.net]||{k:0,c:0,n:0};N[x.net].k+=x.kwh;N[x.net].c+=x.cost||0;N[x.net].n++});
- const nets=Object.keys(N), totalK=nets.reduce((a,n)=>a+N[n].k,0)||1;
- C.cN.setOption({...base,tooltip:{trigger:'item',formatter:p=>`${p.name}<br>${fm(p.value)} kWh · $${fm(N[p.name].c,2)} · ${N[p.name].n} sessions`,backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4'}},
-  legend:{bottom:0,textStyle:{color:'#9aa0a6'},itemWidth:10,itemHeight:10},grid:{left:10,right:10,top:10,bottom:40},
-  xAxis:{type:'value',max:totalK,show:false},yAxis:{type:'category',data:[''],show:false},
-  series:nets.map(n=>({name:n,type:'bar',stack:'n',barWidth:40,itemStyle:{color:COL[n]||'#888',borderRadius:4},data:[+N[n].k.toFixed(1)],label:{show:N[n].k/totalK>0.08,position:'inside',color:'#000',formatter:p=>fm(p.value,0)+' kWh'}}))});
- const L={};R.forEach(x=>{const site=x.net==='Rivian Adventure Network'?'RAN (all)':x.site;L[site]=L[site]||{k:0,c:0};L[site].k+=x.kwh;L[site].c+=x.cost||0});
- const lt=Object.entries(L).sort((a,b)=>b[1].k-a[1].k).slice(0,8).reverse();
- const sn=n=>{const m=n.match(/^([^,]+),\s*([A-Z]{2})\b/);if(m)return m[1].trim()+', '+m[2];return n.length>16?n.slice(0,15)+'…':n};
- C.cL.setOption({...base,grid:{left:100,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value*1000,1)} kWh · $${fm(L[p[0].name].c,2)}`},xAxis:{type:'value',name:'MWh',...ax},yAxis:{type:'category',data:lt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:90,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:lt.map(x=>+(x[1].k/1000).toFixed(2)),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
- const RAN={};R.filter(x=>x.net==='Rivian Adventure Network').forEach(x=>{RAN[x.site]=RAN[x.site]||{k:0,c:0};RAN[x.site].k+=x.kwh;RAN[x.site].c+=x.cost||0});
- const ranLt=Object.entries(RAN).sort((a,b)=>b[1].k-a[1].k).slice(0,8).reverse();
- C.cRAN.setOption({...base,grid:{left:100,right:16,top:10,bottom:24},tooltip:{...base.tooltip,formatter:p=>`${p[0].name}<br>${fm(p[0].value,1)} kWh · $${fm(RAN[p[0].name].c,2)}`},xAxis:{type:'value',name:'kWh',...ax},yAxis:{type:'category',data:ranLt.map(x=>x[0]),...ax,axisLabel:{formatter:sn,width:90,overflow:'truncate',fontSize:11}},series:[{type:'bar',data:ranLt.map(x=>+x[1].k.toFixed(1)),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
+ C.cT.setOption({...base,legend:{textStyle:{color:'#9aa0a6'},top:0,left:'center'},grid:{left:36,right:40,top:44,bottom:28},tooltip:{trigger:'axis',backgroundColor:'#1c1e22',borderColor:'#333',textStyle:{color:'#f0f2f4',fontFamily:'Outfit'}}});
+ C.cN.setOption({...base,legend:{show:false},series:[{type:'pie',radius:['40%','70%'],center:['50%','50%'],label:{show:false},data:Object.entries(R.reduce((a,x)=>{a[x.net]=(a[x.net]||0)+x.kwh;return a},{})).map(([n,v])=>({name:n,value:v,itemStyle:{color:COL[n]||'#888'}}))}]});
+ const locs=Object.entries(R.reduce((a,x)=>{a[x.site]=(a[x.site]||0)+x.kwh;return a},{})).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ C.cL.setOption({...base,legend:{show:false},xAxis:{type:'value',...ax},yAxis:{type:'category',data:locs.map(x=>x[0]),...ax,axisLabel:{width:80,overflow:'truncate'}},series:[{type:'bar',data:locs.map(x=>x[1]/1000),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
+ const ran=Object.entries(R.filter(x=>x.net==='Rivian Adventure Network').reduce((a,x)=>{a[x.site]=(a[x.site]||0)+x.kwh;return a},{})).sort((a,b)=>b[1]-a[1]);
+ C.cRAN.setOption({...base,legend:{show:false},xAxis:{type:'value',...ax},yAxis:{type:'category',data:ran.map(x=>x[0].replace(' RAN','')),...ax,axisLabel:{width:90,overflow:'truncate'}},series:[{type:'bar',data:ran.map(x=>x[1]),itemStyle:{color:'#FFB100',borderRadius:[0,3,3,0]},barMaxWidth:16}]});
  const bins=[0,5,7,10,20,50,75,100,150,250],bl=bins.map((b,i)=>i<bins.length-1?`${b}–${bins[i+1]}`:`${b}+`);
  C.cS.setOption({...base,legend:{show:false},xAxis:{type:'category',data:bl,name:'kW',...ax,axisLabel:{fontSize:10}},yAxis:{type:'value',...ax},series:[{name:'Sessions',type:'bar',itemStyle:{color:'#FFB100',borderRadius:[3,3,0,0]},data:bl.map((_,j)=>R.filter(x=>x.kw>=bins[j]&&(j==bins.length-1||x.kw<bins[j+1])).length)}]});
  table(R);setTimeout(resizeCharts,50)}
 function table(R){const r=[...R].sort((a,b)=>{const x=a[sortK]??-1,y=b[sortK]??-1;return(x>y?1:x<y?-1:0)*sortD}).slice(0,500);
  $('tb').innerHTML=r.map(x=>`<tr><td>${new Date(x.s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}</td><td><span style="color:${COL[x.net]||'#888'}">●</span> ${x.net}</td><td>${x.site}</td><td>${fm(x.kwh,1)}</td><td>${x.cost==null?'–':'$'+fm(x.cost,2)}</td><td>${x.ppk==null?'–':'$'+fm(x.ppk,2)}</td><td>${fm(x.kw,1)}</td><td>${fm(x.d)}</td></tr>`).join('')}
+
+// Refresh button: triggers workflow_dispatch via PAT stored in localStorage
+const REFRESH_KEY = 'ev_dashboard_pat';
+document.getElementById('refreshBtn').onclick = async function() {
+  const btn = this;
+  let pat = localStorage.getItem(REFRESH_KEY);
+  if (!pat) {
+    pat = prompt('Enter a fine-grained GitHub PAT with Actions: Write for hmarkus32/hmarkus32.github.io (stored only in this browser):');
+    if (!pat) return;
+    localStorage.setItem(REFRESH_KEY, pat.trim());
+  }
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const res = await fetch('https://api.github.com/repos/hmarkus32/hmarkus32.github.io/actions/workflows/update-ev-data.yml/dispatches', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + pat,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: JSON.stringify({ ref: 'main' })
+    });
+    if (res.status === 204) {
+      btn.textContent = '✓';
+      setTimeout(() => location.reload(), 50000);
+    } else if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem(REFRESH_KEY);
+      alert('Token invalid or missing Actions: Write. Try again.');
+      btn.textContent = '↻';
+    } else {
+      alert('Failed: ' + res.status);
+      btn.textContent = '↻';
+    }
+  } catch (e) {
+    alert('Error: ' + e.message);
+    btn.textContent = '↻';
+  }
+  btn.disabled = false;
+};
 </script></body></html>
