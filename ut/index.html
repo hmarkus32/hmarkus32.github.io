@@ -29,6 +29,15 @@ label.rem{display:flex;gap:10px;align-items:center;color:var(--t2);margin-top:14
 #err{color:var(--bad);min-height:20px;font-size:13px;margin-top:8px}.link{background:none;border:0;color:var(--t3);font:inherit;min-height:44px;text-decoration:underline}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}#app{display:none}#app.show{display:block;animation:in .5s ease}
 details summary{min-height:44px;display:flex;align-items:center;color:var(--t2);cursor:pointer}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:4px;margin:0 -4px;background:rgba(10,12,16,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px}
+.tab{flex:1;min-height:44px;border:0;border-radius:11px;background:none;color:var(--t2);font:inherit;font-weight:600;transition:all .25s}.tab.on{background:var(--card);color:var(--t)}
+.view{animation:in .35s ease}.prop{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;background:none;border:0;border-top:1px solid var(--line);color:var(--t);font:inherit;text-align:left;padding:0;transition:transform .15s}
+.prop:first-child{border-top:0}.prop:active{transform:scale(.98)}.pn{flex:1;font-size:18px;font-weight:600}.ps{font-size:13px;color:var(--t2)}.ps.x{color:var(--bad)}.ps.ok{color:var(--ok)}.chev{color:var(--t3);font-size:22px}
+.ic{width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}.ic.ok{background:rgba(52,210,123,.15);color:var(--ok)}.ic.bad{background:rgba(255,93,93,.15);color:var(--bad)}.ic.va{background:#222833;color:var(--t2)}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}#scrim.open{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;max-height:85vh;overflow:auto;background:var(--card);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:10px 20px calc(env(safe-area-inset-bottom) + 20px);transform:translateY(105%);transition:transform .38s cubic-bezier(.2,.9,.2,1);z-index:21}
+#sheet.open{transform:none}.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+#sheet .k{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 </style></head><body>
 <div id="lock"><div style="font-size:22px;font-weight:700">Dashboard</div><div class="sub">Enter passcode</div>
 <input id="pw" type="password" autocomplete="current-password" inputmode="text" enterkeyhint="go">

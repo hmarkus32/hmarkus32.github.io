@@ -15,11 +15,11 @@ $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')unlock($('#pw').value
 const saved=localStorage.getItem(KEY);if(saved)unlock(saved,true);
 const usd=n=>n===null?'unknown':'$'+n.toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
 const tone=s=>s==='Paid'?'success':s==='Unpaid'?'danger':s==='Unknown'?'warning':'';
-function render(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
+function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
  const sh=o=>o.replace(' Mountain',' Mtn');
  const chips=(k,opts)=>`<div class="chips" data-k="${k}">${opts.map(o=>`<button class="chip${F[k]===o?' on':''}" data-v="${esc(o)}">${esc(sh(o))}</button>`).join('')}</div>`;
  const sel=(k,opts,l)=>`<select data-k="${k}" aria-label="${l}">${opts.map(o=>`<option value="${o}">${o==='All'?l+': All':o}</option>`).join('')}</select>`;
- $('#app').innerHTML=`<h1>${esc(D.title)}</h1><div class="sub">As of ${esc(D.asOf)} · unknown means not verified</div>
+ $('#det').innerHTML=`<h1>${esc(D.title)}</h1><div class="sub">As of ${esc(D.asOf)} · unknown means not verified</div>
  <div class="grid2" style="margin-top:18px">${D.metrics.map(m=>`<div class="card metric"><div class="v" style="color:var(--${m.tone==='danger'?'bad':'ok'})">${esc(m.value)}</div><div class="l">${esc(m.label)}</div><div class="d">${esc(m.detail||'')}</div></div>`).join('')}</div>
  <h2>Needs attention</h2><div class="card">${D.flags.map(f=>`<div class="row"><div class="main"><div class="k">${esc(f.p)}</div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d)}</div></div><span class="pill ${f.tone}">${esc(f.s)}</span></div>`).join('')}</div>
  <h2>Property</h2>${chips('p',['All',...D.props])}
@@ -43,4 +43,30 @@ function render(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(
  document.querySelectorAll('.chips').forEach(g=>g.addEventListener('click',ev=>{const b=ev.target.closest('.chip');if(!b)return;F[g.dataset.k]=b.dataset.v;g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));update();}));
  document.querySelectorAll('select').forEach(s=>s.onchange=()=>{F[s.dataset.k]=s.value;update();});
  $('#lockbtn').onclick=()=>{localStorage.removeItem(KEY);location.reload();};
- $('#app').classList.add('show');requestAnimationFrame(update);}
+ requestAnimationFrame(update);}
+
+function render(D){const now=new Date();const key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+ const keys=Object.keys(D.home).sort();const k=D.home[key]?key:keys[keys.length-1];
+ const [y,m]=k.split('-').map(Number);const label=new Date(y,m-1,1).toLocaleString('en-US',{month:'long',year:'numeric'});
+ const stale=k!==key;const H=D.home[k];
+ const icon=s=>s==='ok'?'<span class="ic ok">✓</span>':s==='x'?'<span class="ic bad">✕</span>':'<span class="ic va">–</span>';
+ $('#app').innerHTML=`<div class="tabs"><button class="tab on" data-t="home">Home</button><button class="tab" data-t="det">Details</button></div>
+ <div id="home" class="view"><div class="sub" style="margin-top:14px">${stale?'Latest data':'This month'}</div><h1>${esc(label)}</h1>
+ ${stale?`<div class="sub" style="color:var(--warn)">No data yet for ${new Date().toLocaleString('en-US',{month:'long'})}; showing ${esc(label)}</div>`:''}
+ <div class="card" style="margin-top:16px;padding:4px 16px">${H.map((h,i)=>`<button class="prop" data-i="${i}">${icon(h.state)}<span class="pn">${esc(h.p)}</span><span class="ps ${h.state}">${esc(h.sum)}</span><span class="chev">›</span></button>`).join('')}</div></div>
+ <div id="det" class="view" style="display:none"></div>
+ <div id="scrim"></div><div id="sheet"><div class="grab"></div><div id="sc"></div></div>`;
+ renderDetails(D);
+ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  ['home','det'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});window.scrollTo({top:0});});
+ const close=()=>{$('#sheet').classList.remove('open');$('#scrim').classList.remove('open');};
+ $('#scrim').onclick=close;
+ document.querySelectorAll('.prop').forEach(b=>b.onclick=()=>{const h=H[b.dataset.i];
+  const head=h.state==='x'?'What\'s owed':h.state==='ok'?'What was paid':'Status';
+  $('#sc').innerHTML=`<div class="k">${esc(label)}</div><h2 style="margin:4px 0 2px;font-size:22px;text-transform:none;letter-spacing:-.01em;color:var(--t)">${esc(h.p)}</h2><div class="sub">${head} · ${esc(h.sum)}</div>
+  <div style="margin-top:12px">${h.items.map(it=>`<div class="row"><div class="main"><div class="t">${esc(it.t)}</div><div class="d">${it.w?esc(it.w)+' · ':''}${esc(it.n)}</div></div><div class="amt">${esc(it.a)}</div></div>`).join('')}</div>
+  <button class="btn" style="margin-top:16px;max-width:none" id="cls">Close</button>`;
+  $('#cls').onclick=close;$('#scrim').classList.add('open');$('#sheet').classList.add('open');});
+ let sy=null;const sh=$('#sheet');sh.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
+ sh.addEventListener('touchend',e=>{if(sy!==null&&e.changedTouches[0].clientY-sy>60)close();sy=null;});
+ $('#app').classList.add('show');}
