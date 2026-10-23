@@ -1,6 +1,6 @@
 'use strict';
 const $=s=>document.querySelector(s);const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const KEY='ut_pc';
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 async function decrypt(pc){const e=await (await fetch('data.enc.json',{cache:'no-store'})).json();
@@ -15,7 +15,7 @@ $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')unlock($('#pw').value
 const saved=localStorage.getItem(KEY);if(saved)unlock(saved,true);
 const usd=n=>n===null?'unknown':'$'+n.toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
 const tone=s=>s==='Paid'?'success':s==='Unpaid'?'danger':s==='Unknown'?'warning':'';
-function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
+function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));const DM=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].filter(m=>R.some(e=>e.m===m));
  const sh=o=>o.replace(' Mountain',' Mtn');
  const chips=(k,opts)=>`<div class="chips" data-k="${k}">${opts.map(o=>`<button class="chip${F[k]===o?' on':''}" data-v="${esc(o)}">${esc(sh(o))}</button>`).join('')}</div>`;
  const sel=(k,opts,l)=>`<select data-k="${k}" aria-label="${l}">${opts.map(o=>`<option value="${o}">${o==='All'?l+': All':o}</option>`).join('')}</select>`;
@@ -25,11 +25,11 @@ function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.ro
  <h2>Property</h2>${chips('p',['All',...D.props])}
  <h2>Cash flow</h2><div class="card"><div class="leg"><span><i style="background:var(--blue)"></i>In</span><span><i style="background:var(--yel)"></i>Out</span><span><i style="background:var(--cyan)"></i>Net</span></div><div class="chart" id="chart"></div><div class="d" style="color:var(--t3);font-size:11px;margin-top:8px">${esc(D.chartNote)}</div></div>
  <h2 id="ph">Payments</h2>${chips('s',['All','Paid','Unpaid','Scheduled','Unknown'])}
- <div class="grid2" style="margin:10px 0">${sel('m',['All','Aug','Sep','Oct','Nov'],'Month')}${sel('c',['All','Rent','Utilities','Mortgage','HOA','Deposit'],'Category')}</div>
+ <div class="grid2" style="margin:10px 0">${sel('m',['All',...DM],'Month')}${sel('c',['All','Rent','Utilities','Mortgage','HOA','Deposit'],'Category')}</div>
  <div class="card" id="list"></div>
  <details style="margin-top:20px"><summary>Data gaps</summary><div class="d sub">${esc(D.gaps)}</div></details>
  <button class="link" id="lockbtn">Lock and forget on this device</button>`;
- const months=['Aug','Sep','Oct'];const ch=$('#chart');
+ const months=DM.filter(m=>R.some(e=>e.m===m&&e.dir!=='memo'&&e.paid!==null)).slice(-6);const ch=$('#chart');
  ch.innerHTML=months.map(m=>`<div class="grp"><div class="net" data-n="${m}"></div><div class="bars"><div class="bar" style="background:var(--blue)" data-b="${m}in"></div><div class="bar" style="background:var(--yel)" data-b="${m}out"></div><div class="bar" style="background:var(--cyan)" data-b="${m}net"></div></div><div class="lab">${m}</div></div>`).join('');
  function update(){const props=F.p==='All'?D.props:[F.p];
   const sum=(m,d)=>R.filter(e=>e.m===m&&e.dir===d&&props.includes(e.p)&&e.paid!==null).reduce((a,e)=>a+e.paid,0);
