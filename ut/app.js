@@ -51,6 +51,7 @@ function renderEquity(D){
  const selected=new Set(props);
  const colors={Principal:'#3e8cff',Interest:'#f5c542',Escrow:'#2fd3c4',Utilities:'#ff9f43',HOA:'#a78bfa',Expenses:'#ff5d5d',Revenue:'#34d27b'};
  const sh=o=>o.replace(' Mountain',' Mtn');
+ let tipK=null,cur={costs:[],total:0};
  function update(){
   const sel=[...selected];
   const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null);
@@ -69,24 +70,36 @@ function renderEquity(D){
   const revenue=sum(e=>e.dir==='in');
   const totalCost=costs.reduce((a,c)=>a+c.v,0);
   const scale=Math.max(totalCost,revenue,1);
-  const costBar=costs.map(c=>`<div class="seg" style="width:${(c.v/scale*100)}%;background:${colors[c.k]||'#888'}" title="${c.k}: ${usd(c.v)}"></div>`).join('');
+  const costBar=costs.map(c=>`<div class="seg" data-k="${c.k}" style="width:${(c.v/scale*100)}%;background:${colors[c.k]||'#888'}" title="${c.k}: ${usd(c.v)}"></div>`).join('');
   const revBar=`<div class="seg" style="width:${(revenue/scale*100)}%;background:${colors.Revenue}" title="Revenue: ${usd(revenue)}"></div>`;
   $('#eq-cost').innerHTML=costBar||'<div class="seg" style="width:100%;background:var(--line)"></div>';
   $('#eq-rev').innerHTML=revBar;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
-  const leg=costs.filter(c=>c.k!=='Mortgage').map(c=>`<span><i style="background:${colors[c.k]||'#888'}"></i>${c.k} ${usd(c.v)}</span>`).join('');
+  const leg=costs.filter(c=>c.k!=='Mortgage').map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
+  cur={costs,total:totalCost};showTip();
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
   $('#eq-net').style.color=net>=0?'var(--ok)':'var(--bad)';
  }
+ function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
+  if(!c){tipK=null;t.style.opacity=0;t.style.transform='translateY(4px)';return;}
+  const pct=cur.total?Math.round(c.v/cur.total*100):0;
+  t.innerHTML=`<b>${esc(c.k)}</b> ${usd(c.v)} · ${pct}%`;
+  const card=$('#eq-cc').getBoundingClientRect(),bar=$('#eq-cost').getBoundingClientRect();
+  const a=$(`#eq-cost [data-k="${c.k}"]`)||$(`#eq-leg [data-k="${c.k}"]`),r=a.getBoundingClientRect();
+  const w=t.offsetWidth;const x=Math.max(8,Math.min(r.left+r.width/2-card.left-w/2,card.width-w-8));
+  t.style.left=x+'px';t.style.top=(bar.bottom-card.top+6)+'px';t.style.opacity=1;t.style.transform='translateY(0)';
+ }
  $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">All recorded cash flow · same scale on both bars</div>
  <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
- <h2>Costs</h2><div class="card"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost"></div>
- <div class="sub" style="margin-top:4px">Principal · Interest · Escrow · Utilities · HOA · Expenses</div></div>
+ <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer"></div>
+ <div id="eq-tip" style="position:absolute;left:0;top:0;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;background:var(--line);color:var(--t);font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:5"></div></div>
  <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"></div></div>
  <div class="card" style="margin-top:8px"><div class="k">Net</div><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
+ $('#eq-cc').addEventListener('click',ev=>{const el=ev.target.closest('[data-k]');if(!el)return;tipK=tipK===el.dataset.k?null:el.dataset.k;showTip();});
+ document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k]')){tipK=null;showTip();}});
  document.querySelectorAll('#eq-chips .chip').forEach(b=>b.onclick=()=>{
   const p=b.dataset.p;
   if(selected.has(p)){if(selected.size>1)selected.delete(p);}else selected.add(p);
