@@ -52,9 +52,18 @@ function renderEquity(D){
  const colors={Principal:'#3e8cff',Interest:'#f5c542',Escrow:'#2fd3c4',Utilities:'#ff9f43',HOA:'#a78bfa',Expenses:'#ff5d5d',Revenue:'#34d27b'};
  const sh=o=>o.replace(' Mountain',' Mtn');
  let tipK=null,cur={costs:[],total:0};
+ const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ const now=new Date(),nowK=now.getFullYear()*12+now.getMonth();
+ const mk=m=>{const i=MN.indexOf(m);return i<0?null:(i>now.getMonth()+2?now.getFullYear()-1:now.getFullYear())*12+i;};
+ R.forEach(e=>e.k=mk(e.m));
+ const avail=[...new Set(R.filter(e=>e.paid!==null&&e.k!==null&&e.k<=nowK).map(e=>e.k))].sort((a,b)=>b-a);
+ let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
+ const minK=avail.length?avail[avail.length-1]:nowK;
+ const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
+ const KS=['Principal','Interest','Escrow','Utilities','HOA','Expenses','Mortgage'];
  function update(){
   const sel=[...selected];
-  const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null);
+  const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
   const sum=pred=>rows.filter(pred).reduce((a,e)=>a+(e.paid||0),0);
   const costs=[
    {k:'Principal',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/principal/i.test(e.item))},
@@ -70,15 +79,14 @@ function renderEquity(D){
   const revenue=sum(e=>e.dir==='in');
   const totalCost=costs.reduce((a,c)=>a+c.v,0);
   const scale=Math.max(totalCost,revenue,1);
-  const costBar=costs.map(c=>`<div class="seg" data-k="${c.k}" style="width:${(c.v/scale*100)}%;background:${colors[c.k]||'#888'}" title="${c.k}: ${usd(c.v)}"></div>`).join('');
-  const revBar=`<div class="seg" style="width:${(revenue/scale*100)}%;background:${colors.Revenue}" title="Revenue: ${usd(revenue)}"></div>`;
-  $('#eq-cost').innerHTML=costBar||'<div class="seg" style="width:100%;background:var(--line)"></div>';
-  $('#eq-rev').innerHTML=revBar;
+  KS.forEach(k=>{const c=costs.find(x=>x.k===k),el=$(`#eq-cost [data-k="${k}"]`);el.style.width=(c?c.v/scale*100:0)+'%';el.style.minWidth=c?'':'0';el.title=c?`${k}: ${usd(c.v)}`:'';});
+  const rv=$('#eq-rev .seg');rv.style.width=(revenue/scale*100)+'%';rv.style.minWidth=revenue?'':'0';rv.title=`Revenue: ${usd(revenue)}`;
+  $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
   const leg=costs.filter(c=>c.k!=='Mortgage').map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
-  cur={costs,total:totalCost};showTip();
+  cur={costs,total:totalCost};showTip();clearTimeout(update.t);update.t=setTimeout(showTip,620);
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
   $('#eq-net').style.color=net>=0?'var(--ok)':'var(--bad)';
@@ -92,14 +100,21 @@ function renderEquity(D){
   const w=t.offsetWidth;const x=Math.max(8,Math.min(r.left+r.width/2-card.left-w/2,card.width-w-8));
   t.style.left=x+'px';t.style.top=(bar.bottom-card.top+6)+'px';t.style.opacity=1;t.style.transform='translateY(0)';
  }
- $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">All recorded cash flow · same scale on both bars</div>
+ $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">Monthly cash flow · same scale on both bars</div>
  <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
- <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer"></div>
+ <div class="mnav" id="eq-mn"><button id="eq-prev" aria-label="Previous month">‹</button><button id="eq-mt" class="mt"></button><button id="eq-next" aria-label="Next month">›</button>
+ <div class="mdd" id="eq-dd">${avail.map(k=>`<button data-m="${k}">${mLabel(k)}</button>`).join('')}</div></div>
+ <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer">${KS.map(k=>`<div class="seg" data-k="${k}" style="width:0;min-width:0;background:${colors[k]||'#888'}"></div>`).join('')}</div>
  <div id="eq-tip" style="position:absolute;left:0;top:0;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;background:var(--line);color:var(--t);font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:5"></div></div>
- <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"></div></div>
+ <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"><div class="seg" style="width:0;min-width:0;background:${colors.Revenue}"></div></div></div>
  <div class="card" style="margin-top:8px"><div class="k">Net</div><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
  $('#eq-cc').addEventListener('click',ev=>{const el=ev.target.closest('[data-k]');if(!el)return;tipK=tipK===el.dataset.k?null:el.dataset.k;showTip();});
- document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k]')){tipK=null;showTip();}});
+ document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k],#eq-mn')){tipK=null;showTip();}
+  if(!ev.target.closest('#eq-mn'))$('#eq-dd').classList.remove('open');});
+ const go=k=>{if(k<minK||k>nowK)return;month=k;$('#eq-dd').classList.remove('open');update();};
+ $('#eq-prev').onclick=()=>go(month-1);$('#eq-next').onclick=()=>go(month+1);
+ $('#eq-mt').onclick=()=>{const d=$('#eq-dd');d.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.m===month));d.classList.toggle('open');};
+ $('#eq-dd').onclick=ev=>{const b=ev.target.closest('[data-m]');if(b)go(+b.dataset.m);};
  document.querySelectorAll('#eq-chips .chip').forEach(b=>b.onclick=()=>{
   const p=b.dataset.p;
   if(selected.has(p)){if(selected.size>1)selected.delete(p);}else selected.add(p);

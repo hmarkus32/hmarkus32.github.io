@@ -43,6 +43,14 @@ details summary{min-height:44px;display:flex;align-items:center;color:var(--t2);
 .leg2{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--t2);margin:6px 0 14px}
 .leg2 span{display:flex;align-items:center;gap:5px}
 .leg2 i{width:10px;height:10px;border-radius:3px}
+.mnav{position:relative;display:flex;align-items:center;justify-content:space-between;margin:18px 0 0}
+.mnav>button{min-width:44px;min-height:44px;border:0;background:none;color:var(--t);font:inherit;font-size:26px;border-radius:12px;transition:opacity .2s,transform .15s}
+.mnav>button:disabled{opacity:.25}.mnav>button:active:not(:disabled){transform:scale(.92)}
+.mnav .mt{font-size:15px;font-weight:700;letter-spacing:.08em;padding:0 16px}.mnav .mt::after{content:' ▾';font-size:11px;color:var(--t2)}
+.mdd{position:absolute;left:50%;top:48px;min-width:180px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;transform:translate(-50%,-6px) scale(.97);transition:opacity .18s ease,transform .18s ease}
+.mdd.open{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}
+.mdd button{display:block;width:100%;min-height:44px;border:0;background:none;color:var(--t2);font:inherit;font-weight:600;letter-spacing:.06em;border-radius:10px;text-align:center}
+.mdd button.on{color:var(--t);background:var(--line)}
 .eq-num{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
 
 </style></head><body>
