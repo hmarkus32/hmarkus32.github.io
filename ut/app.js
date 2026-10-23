@@ -1,6 +1,6 @@
 'use strict';
 const $=s=>document.querySelector(s);const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
 const KEY='ut_pc';
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 async function decrypt(pc){const e=await (await fetch('data.enc.json',{cache:'no-store'})).json();
@@ -49,7 +49,7 @@ function renderEquity(D){
  const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
  const props=D.props||[];
  const selected=new Set(props);
- const colors={Principal:'#3e8cff',Interest:'#f5c542',Escrow:'#2fd3c4',Utilities:'#ff9f43',HOA:'#a78bfa',Expenses:'#ff5d5d',Revenue:'#34d27b'};
+ const colors={Principal:'#9bc2ff',Interest:'#ffe4a3',Escrow:'#c5e8dc',Utilities:'#ffd4a8',HOA:'#e8c4d8',Expenses:'#ffc4c4',Mortgage:'#d4c4e8',Revenue:'#b8e8b0'};
  const sh=o=>o.replace(' Mountain',' Mtn');
  let tipK=null,cur={costs:[],total:0};
  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -60,7 +60,7 @@ function renderEquity(D){
  let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
  const minK=avail.length?avail[avail.length-1]:nowK;
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
- const KS=['Principal','Interest','Escrow','Utilities','HOA','Expenses','Mortgage'];
+ const KS=['Interest','Escrow','Utilities','HOA','Expenses','Mortgage','Principal'];
  function update(){
   const sel=[...selected];
   const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
@@ -81,6 +81,7 @@ function renderEquity(D){
   const scale=Math.max(totalCost,revenue,1);
   KS.forEach(k=>{const c=costs.find(x=>x.k===k),el=$(`#eq-cost [data-k="${k}"]`);el.style.width=(c?c.v/scale*100:0)+'%';el.style.minWidth=c?'':'0';el.title=c?`${k}: ${usd(c.v)}`:'';});
   const rv=$('#eq-rev .seg');rv.style.width=(revenue/scale*100)+'%';rv.style.minWidth=revenue?'':'0';rv.title=`Revenue: ${usd(revenue)}`;
+  const line=$('#eq-line');if(line){line.style.left=(revenue/scale*100)+'%';}
   $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
@@ -104,10 +105,13 @@ function renderEquity(D){
  <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
  <div class="mnav" id="eq-mn"><button id="eq-prev" aria-label="Previous month">‹</button><button id="eq-mt" class="mt"></button><button id="eq-next" aria-label="Next month">›</button>
  <div class="mdd" id="eq-dd">${avail.map(k=>`<button data-m="${k}">${mLabel(k)}</button>`).join('')}</div></div>
+ <div id="eq-bars" style="position:relative">
  <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer">${KS.map(k=>`<div class="seg" data-k="${k}" style="width:0;min-width:0;background:${colors[k]||'#888'}"></div>`).join('')}</div>
  <div id="eq-tip" style="position:absolute;left:0;top:0;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;background:var(--line);color:var(--t);font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:5"></div></div>
  <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"><div class="seg" style="width:0;min-width:0;background:${colors.Revenue}"></div></div></div>
- <div class="card" style="margin-top:8px"><div class="k">Net</div><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
+ <div id="eq-line" style="position:absolute;top:0;bottom:0;width:0;border-left:2px dotted rgba(255,255,255,.35);pointer-events:none;z-index:2;transition:left .6s cubic-bezier(.2,.8,.2,1)"></div>
+ </div>
+ <h2>Net</h2><div class="card"><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
  $('#eq-cc').addEventListener('click',ev=>{const el=ev.target.closest('[data-k]');if(!el)return;tipK=tipK===el.dataset.k?null:el.dataset.k;showTip();});
  document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k],#eq-mn')){tipK=null;showTip();}
   if(!ev.target.closest('#eq-mn'))$('#eq-dd').classList.remove('open');});
