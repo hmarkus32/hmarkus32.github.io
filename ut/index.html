@@ -38,6 +38,13 @@ details summary{min-height:44px;display:flex;align-items:center;color:var(--t2);
 #sheet{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;max-height:85vh;overflow:auto;background:var(--card);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:10px 20px calc(env(safe-area-inset-bottom) + 20px);transform:translateY(105%);transition:transform .38s cubic-bezier(.2,.9,.2,1);z-index:21}
 #sheet.open{transform:none}.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
 #sheet .k{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.hbar{display:flex;height:48px;border-radius:12px;overflow:hidden;background:var(--line);margin:8px 0 4px}
+.seg{height:100%;transition:width .6s cubic-bezier(.2,.8,.2,1);min-width:2px}
+.leg2{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--t2);margin:6px 0 14px}
+.leg2 span{display:flex;align-items:center;gap:5px}
+.leg2 i{width:10px;height:10px;border-radius:3px}
+.eq-num{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+
 </style></head><body>
 <div id="lock"><div style="font-size:22px;font-weight:700">Dashboard</div><div class="sub">Enter passcode</div>
 <input id="pw" type="password" autocomplete="current-password" inputmode="text" enterkeyhint="go">

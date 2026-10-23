@@ -45,20 +45,74 @@ function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.ro
  $('#lockbtn').onclick=()=>{localStorage.removeItem(KEY);location.reload();};
  requestAnimationFrame(update);}
 
+function renderEquity(D){
+ const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
+ const props=D.props||[];
+ const selected=new Set(props);
+ const colors={Principal:'#3e8cff',Interest:'#f5c542',Escrow:'#2fd3c4',Utilities:'#ff9f43',HOA:'#a78bfa',Expenses:'#ff5d5d',Revenue:'#34d27b'};
+ const sh=o=>o.replace(' Mountain',' Mtn');
+ function update(){
+  const sel=[...selected];
+  const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null);
+  const sum=pred=>rows.filter(pred).reduce((a,e)=>a+(e.paid||0),0);
+  const costs=[
+   {k:'Principal',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/principal/i.test(e.item))},
+   {k:'Interest',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/interest/i.test(e.item))},
+   {k:'Escrow',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/escrow/i.test(e.item))},
+   {k:'Utilities',v:sum(e=>e.dir==='out'&&e.c==='Utilities')},
+   {k:'HOA',v:sum(e=>e.dir==='out'&&e.c==='HOA')},
+   {k:'Expenses',v:sum(e=>e.dir==='out'&&!['Mortgage','Utilities','HOA'].includes(e.c))}
+  ].filter(x=>x.v>0);
+  const mortTotal=sum(e=>e.dir==='out'&&e.c==='Mortgage');
+  const mortSplit=costs.filter(c=>['Principal','Interest','Escrow'].includes(c.k)).reduce((a,c)=>a+c.v,0);
+  if(mortTotal>mortSplit) costs.push({k:'Mortgage',v:mortTotal-mortSplit});
+  const revenue=sum(e=>e.dir==='in');
+  const totalCost=costs.reduce((a,c)=>a+c.v,0);
+  const scale=Math.max(totalCost,revenue,1);
+  const costBar=costs.map(c=>`<div class="seg" style="width:${(c.v/scale*100)}%;background:${colors[c.k]||'#888'}" title="${c.k}: ${usd(c.v)}"></div>`).join('');
+  const revBar=`<div class="seg" style="width:${(revenue/scale*100)}%;background:${colors.Revenue}" title="Revenue: ${usd(revenue)}"></div>`;
+  $('#eq-cost').innerHTML=costBar||'<div class="seg" style="width:100%;background:var(--line)"></div>';
+  $('#eq-rev').innerHTML=revBar;
+  $('#eq-cost-sum').textContent=usd(totalCost);
+  $('#eq-rev-sum').textContent=usd(revenue);
+  const leg=costs.map(c=>`<span><i style="background:${colors[c.k]||'#888'}"></i>${c.k} ${usd(c.v)}</span>`).join('')+`<span><i style="background:${colors.Revenue}"></i>Revenue ${usd(revenue)}</span>`;
+  $('#eq-leg').innerHTML=leg;
+  const net=revenue-totalCost;
+  $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
+  $('#eq-net').style.color=net>=0?'var(--ok)':'var(--bad)';
+ }
+ $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">All recorded cash flow · same scale on both bars</div>
+ <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
+ <h2>Costs</h2><div class="card"><div class="eq-num" id="eq-cost-sum"></div><div class="hbar" id="eq-cost"></div>
+ <div class="sub" style="margin-top:4px">Principal · Interest · Escrow · Utilities · HOA · Expenses</div></div>
+ <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"></div></div>
+ <div class="leg2" id="eq-leg"></div>
+ <div class="card" style="margin-top:8px"><div class="k">Net</div><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
+ document.querySelectorAll('#eq-chips .chip').forEach(b=>b.onclick=()=>{
+  const p=b.dataset.p;
+  if(selected.has(p)){if(selected.size>1)selected.delete(p);}else selected.add(p);
+  b.classList.toggle('on',selected.has(p));
+  update();
+ });
+ update();
+}
+
 function render(D){const now=new Date();const key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
  const keys=Object.keys(D.home).sort();const k=D.home[key]?key:keys[keys.length-1];
  const [y,m]=k.split('-').map(Number);const label=new Date(y,m-1,1).toLocaleString('en-US',{month:'long',year:'numeric'});
  const stale=k!==key;const H=D.home[k];
  const icon=s=>s==='ok'?'<span class="ic ok">✓</span>':s==='x'?'<span class="ic bad">✕</span>':'<span class="ic va">–</span>';
- $('#app').innerHTML=`<div class="tabs"><button class="tab on" data-t="home">Home</button><button class="tab" data-t="det">Details</button></div>
+ $('#app').innerHTML=`<div class="tabs"><button class="tab on" data-t="home">Home</button><button class="tab" data-t="det">Details</button><button class="tab" data-t="eq">Equity</button></div>
  <div id="home" class="view"><div class="sub" style="margin-top:14px">${stale?'Latest data':'This month'}</div><h1>${esc(label)}</h1>
  ${stale?`<div class="sub" style="color:var(--warn)">No data yet for ${new Date().toLocaleString('en-US',{month:'long'})}; showing ${esc(label)}</div>`:''}
  <div class="card" style="margin-top:16px;padding:4px 16px">${H.map((h,i)=>`<button class="prop" data-i="${i}">${icon(h.state)}<span class="pn">${esc(h.p)}</span><span class="ps ${h.state}">${esc(h.sum)}</span><span class="chev">›</span></button>`).join('')}</div></div>
  <div id="det" class="view" style="display:none"></div>
+ <div id="eq" class="view" style="display:none"></div>
  <div id="scrim"></div><div id="sheet"><div class="grab"></div><div id="sc"></div></div>`;
  renderDetails(D);
+ renderEquity(D);
  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  ['home','det'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});window.scrollTo({top:0});});
+  ['home','det','eq'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});window.scrollTo({top:0});});
  const close=()=>{$('#sheet').classList.remove('open');$('#scrim').classList.remove('open');};
  $('#scrim').onclick=close;
  document.querySelectorAll('.prop').forEach(b=>b.onclick=()=>{const h=H[b.dataset.i];
