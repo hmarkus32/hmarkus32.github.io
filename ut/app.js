@@ -75,7 +75,7 @@ function renderEquity(D){
   $('#eq-rev').innerHTML=revBar;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
-  const leg=costs.map(c=>`<span><i style="background:${colors[c.k]||'#888'}"></i>${c.k} ${usd(c.v)}</span>`).join('')+`<span><i style="background:${colors.Revenue}"></i>Revenue ${usd(revenue)}</span>`;
+  const leg=costs.filter(c=>c.k!=='Mortgage').map(c=>`<span><i style="background:${colors[c.k]||'#888'}"></i>${c.k} ${usd(c.v)}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
@@ -83,10 +83,9 @@ function renderEquity(D){
  }
  $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">All recorded cash flow · same scale on both bars</div>
  <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
- <h2>Costs</h2><div class="card"><div class="eq-num" id="eq-cost-sum"></div><div class="hbar" id="eq-cost"></div>
+ <h2>Costs</h2><div class="card"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost"></div>
  <div class="sub" style="margin-top:4px">Principal · Interest · Escrow · Utilities · HOA · Expenses</div></div>
  <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"></div></div>
- <div class="leg2" id="eq-leg"></div>
  <div class="card" style="margin-top:8px"><div class="k">Net</div><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
  document.querySelectorAll('#eq-chips .chip').forEach(b=>b.onclick=()=>{
   const p=b.dataset.p;
