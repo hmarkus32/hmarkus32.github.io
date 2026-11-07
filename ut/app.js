@@ -89,7 +89,7 @@ function renderEquity(D){
  const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));
  const props=D.props||[];
  const selected=new Set(props);
- const colors={Principal:'#9bc2ff',Interest:'#ffe4a3',Escrow:'#c5e8dc',Utilities:'#ffd4a8',HOA:'#e8c4d8',Expenses:'#ffc4c4',Mortgage:'#d4c4e8',Revenue:'#b8e8b0'};
+ const colors={Principal:'#3D7BD9',Interest:'#F5B841',Escrow:'#8C6BAE',Utilities:'#4F8A8B',HOA:'#B49AC9',Expenses:'#D9534F',Mortgage:'#6E548C',Revenue:'#7D9B6A'};
  const sh=o=>o.replace(' Mountain',' Mtn');
  let tipK=null,cur={costs:[],total:0};
  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -100,7 +100,7 @@ function renderEquity(D){
  let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
  const minK=avail.length?avail[avail.length-1]:nowK;
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
- const KS=['Interest','Escrow','Utilities','HOA','Expenses','Mortgage','Principal'];
+ const KS=['HOA','Utilities','Escrow','Interest','Principal','Expenses','Mortgage'];
  function update(){
   const sel=[...selected];
   const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
@@ -125,12 +125,12 @@ function renderEquity(D){
   $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
-  const leg=costs.filter(c=>c.k!=='Mortgage').map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
+  const leg=['HOA','Utilities','Escrow','Interest','Principal','Expenses'].map(k=>costs.find(c=>c.k===k)).filter(Boolean).map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
   cur={costs,total:totalCost};showTip();clearTimeout(update.t);update.t=setTimeout(showTip,620);
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
-  $('#eq-net').style.color=net>=0?'var(--ok)':'var(--bad)';
+  $('#eq-net').style.color=net>=0?'#7D9B6A':'#D9534F';
  }
  function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
   if(!c){tipK=null;t.style.opacity=0;t.style.transform='translateY(4px)';return;}
