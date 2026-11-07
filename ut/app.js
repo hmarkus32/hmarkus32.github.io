@@ -101,6 +101,10 @@ function renderEquity(D){
  const minK=avail.length?avail[avail.length-1]:nowK;
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
  const KS=['HOA','Utilities','Escrow','Expenses','Interest','Principal','Mortgage'];
+ let lineF=0;
+ function placeLine(){const line=$('#eq-line');if(!line)return;const cb2=$('#eq-cost'),rv2=$('#eq-rev');if(!cb2||!rv2)return;
+  const wr=$('#eq-bars').getBoundingClientRect(),cr=cb2.getBoundingClientRect(),rr=rv2.getBoundingClientRect();
+  if(!rr.width)return;line.style.left=(rr.left-wr.left+lineF*rr.width)+'px';line.style.top=(cr.top-wr.top)+'px';line.style.height=(rr.bottom-cr.top)+'px';}
  function update(){
   const sel=[...selected];
   const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
@@ -108,7 +112,7 @@ function renderEquity(D){
   const costs=[
    {k:'Principal',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/principal/i.test(e.item))},
    {k:'Interest',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/interest/i.test(e.item))},
-   {k:'Escrow',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/escrow/i.test(e.item))},
+   {k:'Escrow',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/escrow|tax|insur|\bpmi\b|\bmip\b/i.test(e.item))},
    {k:'Utilities',v:sum(e=>e.dir==='out'&&e.c==='Utilities')},
    {k:'HOA',v:sum(e=>e.dir==='out'&&e.c==='HOA')},
    {k:'Expenses',v:sum(e=>e.dir==='out'&&!['Mortgage','Utilities','HOA'].includes(e.c))}
@@ -122,20 +126,19 @@ function renderEquity(D){
   const scale=Math.max(totalCost,revenue,1);
   KS.forEach(k=>{const c=costs.find(x=>x.k===k),el=$(`#eq-cost [data-k="${k}"]`);el.style.width=(c?c.v/scale*100:0)+'%';el.style.minWidth=c?'':'0';el.title=c?`${k}: ${usd(c.v)}`:'';});
   const rv=$('#eq-rev .seg');rv.style.width=(revenue/scale*100)+'%';rv.style.minWidth=revenue?'':'0';rv.title=`Revenue: ${usd(revenue)}`;
-  const line=$('#eq-line');if(line){const cb2=$('#eq-cost'),rv2=$('#eq-rev');
-   if(cb2&&rv2){const wr=$('#eq-bars').getBoundingClientRect(),cr=cb2.getBoundingClientRect(),rr=rv2.getBoundingClientRect();
-    if(rr.width){line.style.left=(rr.left-wr.left+(revenue/scale)*rr.width)+'px';line.style.top=(cr.top-wr.top)+'px';line.style.height=(rr.bottom-cr.top)+'px';}}}
+  lineF=revenue/scale;
   $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
   const leg=['HOA','Utilities','Escrow','Expenses','Interest','Principal'].map(k=>costs.find(c=>c.k===k)).filter(Boolean).map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
-  cur={costs,total:totalCost};showTip();clearTimeout(update.t);update.t=setTimeout(showTip,620);
+  cur={costs,total:totalCost};showTip();clearTimeout(update.t);update.t=setTimeout(()=>{showTip();placeLine();},620);
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
   $('#eq-net').style.color=net>=0?'#7D9B6A':'#D9534F';
   const prin=(costs.find(c=>c.k==='Principal')||{v:0}).v;const netp=net+prin;const enp=$('#eq-netp');
   if(enp){enp.textContent=(netp>=0?'+':'')+usd(netp);enp.style.color=netp>=0?'#7D9B6A':'#D9534F';}
+  placeLine();requestAnimationFrame(placeLine);
  }
  function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
   if(!c){tipK=null;t.style.opacity=0;t.style.transform='translateY(4px)';return;}
