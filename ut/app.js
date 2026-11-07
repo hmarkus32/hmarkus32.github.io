@@ -115,13 +115,16 @@ function renderEquity(D){
   ].filter(x=>x.v>0);
   const mortTotal=sum(e=>e.dir==='out'&&e.c==='Mortgage');
   const mortSplit=costs.filter(c=>['Principal','Interest','Escrow'].includes(c.k)).reduce((a,c)=>a+c.v,0);
-  if(mortTotal>mortSplit) costs.push({k:'Mortgage',v:mortTotal-mortSplit});
+  const mortLeft=Math.round((mortTotal-mortSplit)*100)/100;
+  if(mortLeft>=0.01) costs.push({k:'Mortgage',v:mortLeft});
   const revenue=sum(e=>e.dir==='in');
   const totalCost=costs.reduce((a,c)=>a+c.v,0);
   const scale=Math.max(totalCost,revenue,1);
   KS.forEach(k=>{const c=costs.find(x=>x.k===k),el=$(`#eq-cost [data-k="${k}"]`);el.style.width=(c?c.v/scale*100:0)+'%';el.style.minWidth=c?'':'0';el.title=c?`${k}: ${usd(c.v)}`:'';});
   const rv=$('#eq-rev .seg');rv.style.width=(revenue/scale*100)+'%';rv.style.minWidth=revenue?'':'0';rv.title=`Revenue: ${usd(revenue)}`;
-  const line=$('#eq-line');if(line){line.style.left=(revenue/scale*100)+'%';}
+  const line=$('#eq-line');if(line){const cb2=$('#eq-cost'),rv2=$('#eq-rev');
+   if(cb2&&rv2){const wr=$('#eq-bars').getBoundingClientRect(),cr=cb2.getBoundingClientRect(),rr=rv2.getBoundingClientRect();
+    if(rr.width){line.style.left=(rr.left-wr.left+(revenue/scale)*rr.width)+'px';line.style.top=(cr.top-wr.top)+'px';line.style.height=(rr.bottom-cr.top)+'px';}}}
   $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
@@ -131,6 +134,8 @@ function renderEquity(D){
   const net=revenue-totalCost;
   $('#eq-net').textContent=(net>=0?'+':'')+usd(net);
   $('#eq-net').style.color=net>=0?'#7D9B6A':'#D9534F';
+  const prin=(costs.find(c=>c.k==='Principal')||{v:0}).v;const netp=net+prin;const enp=$('#eq-netp');
+  if(enp){enp.textContent=(netp>=0?'+':'')+usd(netp);enp.style.color=netp>=0?'#7D9B6A':'#D9534F';}
  }
  function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
   if(!c){tipK=null;t.style.opacity=0;t.style.transform='translateY(4px)';return;}
@@ -149,9 +154,10 @@ function renderEquity(D){
  <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer">${KS.map(k=>`<div class="seg" data-k="${k}" style="width:0;min-width:0;background:${colors[k]||'#888'}"></div>`).join('')}</div>
  <div id="eq-tip" style="position:absolute;left:0;top:0;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;background:var(--line);color:var(--t);font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:5"></div></div>
  <h2>Revenue</h2><div class="card"><div class="eq-num" id="eq-rev-sum"></div><div class="hbar" id="eq-rev"><div class="seg" style="width:0;min-width:0;background:${colors.Revenue}"></div></div></div>
- <div id="eq-line" style="position:absolute;top:0;bottom:0;width:0;border-left:2px dotted rgba(255,255,255,.35);pointer-events:none;z-index:2;transition:left .6s cubic-bezier(.2,.8,.2,1)"></div>
+ <div id="eq-line" style="position:absolute;top:0;height:0;width:0;border-left:2px dotted rgba(255,255,255,.35);pointer-events:none;z-index:2;transition:left .6s cubic-bezier(.2,.8,.2,1)"></div>
  </div>
- <h2>Net</h2><div class="card"><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>`;
+ <h2>Net</h2><div class="card"><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>
+ <h2>Net before principal</h2><div class="card"><div class="eq-num" id="eq-netp" style="font-size:22px"></div><div class="d" style="color:var(--t3);font-size:11px;margin-top:4px">Principal paydown excluded — it builds equity, it is not an expense</div></div>`;
  $('#eq-cc').addEventListener('click',ev=>{const el=ev.target.closest('[data-k]');if(!el)return;tipK=tipK===el.dataset.k?null:el.dataset.k;showTip();});
  document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k],#eq-mn')){tipK=null;showTip();}
   if(!ev.target.closest('#eq-mn'))$('#eq-dd').classList.remove('open');});
@@ -165,6 +171,8 @@ function renderEquity(D){
   b.classList.toggle('on',selected.has(p));
   update();
  });
+ window.__eqFix=update;
+ if(!window.__eqRes){window.__eqRes=1;window.addEventListener('resize',()=>{if(window.__eqFix)window.__eqFix();});}
  update();
 }
 
@@ -184,7 +192,7 @@ function render(D){const now=new Date();const key=now.getFullYear()+'-'+String(n
  renderEquity(D);
  const rb=$('#refreshbtn');if(rb)rb.onclick=()=>refreshData(rb);
  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  ['home','det','eq'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});window.scrollTo({top:0});});
+  ['home','det','eq'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});if(t.dataset.t==='eq'&&window.__eqFix)window.__eqFix();window.scrollTo({top:0});});
  const close=()=>{$('#sheet').classList.remove('open');$('#scrim').classList.remove('open');};
  $('#scrim').onclick=close;
  document.querySelectorAll('.prop').forEach(b=>b.onclick=()=>{const h=H[b.dataset.i];
