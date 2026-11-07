@@ -13,6 +13,40 @@ async function unlock(pc,remember){$('#err').textContent='';$('#go').textContent
 $('#go').onclick=()=>unlock($('#pw').value,$('#rem').checked);
 $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')unlock($('#pw').value,$('#rem').checked);});
 const saved=localStorage.getItem(KEY);if(saved)unlock(saved,true);
+// --- Face ID unlock (WebAuthn passkey + PRF). The passcode itself never changes:
+// data.enc.json stays encrypted with it. Face ID only unwraps a sealed copy of the
+// passcode stored in this browser's local storage; the sealing key comes from the
+// passkey's PRF output, which the authenticator releases only after Face ID.
+const BIO='ut_bio';
+const b64enc=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+async function kekFromPrf(prf){const km=await crypto.subtle.importKey('raw',prf,'HKDF',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:new TextEncoder().encode('ut-dashboard'),info:new TextEncoder().encode('faceid-wrap-v1')},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function prfGet(rec){const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:b64(rec.id)}],userVerification:'required',extensions:{prf:{eval:{first:b64(rec.salt)}}}}});
+ const prf=a.getClientExtensionResults().prf&&a.getClientExtensionResults().prf.results&&a.getClientExtensionResults().prf.results.first;
+ if(!prf)throw new Error('prf unavailable');return new Uint8Array(prf);}
+function showBio(){const has=!!localStorage.getItem(BIO);const b=$('#bio');if(b)b.style.display=has?'':'none';
+ const st=$('#bioSetup');if(st)st.style.display=(!has&&bioCapable)?'':'none';}
+let bioCapable=false;
+async function bioEnroll(){$('#err').style.color='';const pc=$('#pw').value;
+ if(!pc){$('#err').textContent='Enter your passcode above first, then tap Enable Face ID';return;}
+ $('#err').textContent='';try{await decrypt(pc);}catch(x){$('#err').textContent='Wrong passcode';return;}
+ try{const salt=crypto.getRandomValues(new Uint8Array(32));
+  const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'UT Dashboard',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'dashboard',displayName:'Dashboard'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'required'},extensions:{prf:{eval:{first:salt}}}}});
+  const rec={id:b64enc(cred.rawId),salt:b64enc(salt)};
+  let ext=cred.getClientExtensionResults().prf;let prf=ext&&ext.results&&ext.results.first;
+  if(!prf)prf=await prfGet(rec);else prf=new Uint8Array(prf);
+  const kek=await kekFromPrf(prf);const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},kek,new TextEncoder().encode(pc));
+  rec.iv=b64enc(iv);rec.ct=b64enc(ct);localStorage.setItem(BIO,JSON.stringify(rec));localStorage.removeItem(KEY);
+  showBio();$('#err').style.color='var(--ok)';$('#err').textContent='Face ID is on — use the Face ID button next time';
+ }catch(x){$('#err').textContent='Face ID setup was cancelled or is not available here';}}
+async function bioUnlock(){$('#err').style.color='';$('#err').textContent='';
+ try{const rec=JSON.parse(localStorage.getItem(BIO));const prf=await prfGet(rec);const kek=await kekFromPrf(prf);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(rec.iv)},kek,b64(rec.ct));
+  unlock(new TextDecoder().decode(pt),false);
+ }catch(x){$('#err').textContent='Face ID unlock failed — use your passcode';}}
+if(window.PublicKeyCredential){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(a=>{bioCapable=!!a;showBio();});}
+const bb=$('#bio');if(bb)bb.onclick=bioUnlock;const bs=$('#bioSetup');if(bs)bs.onclick=bioEnroll;showBio();
 const usd=n=>n===null?'unknown':'$'+n.toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
 const tone=s=>s==='Paid'?'success':s==='Unpaid'?'danger':s==='Unknown'?'warning':'';
 function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.rows.map(r=>({m:r[0],p:r[1],c:r[2],item:r[3],due:r[4],paid:r[5],dir:r[6],st:r[7],date:r[8],note:r[9]}));const DM=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].filter(m=>R.some(e=>e.m===m));
@@ -42,7 +76,7 @@ function renderDetails(D){const F={p:'All',m:'All',c:'All',s:'All'};const R=D.ro
   $('#list').innerHTML=rows.map((e,i)=>`<div class="row" style="animation-delay:${Math.min(i*25,300)}ms"><div class="main"><div class="k">${e.m} · ${esc(e.p)} · ${e.c}</div><div class="t">${esc(e.item)}</div><div class="d">Due ${usd(e.due)}${e.date?' · '+esc(e.date):''}. ${esc(e.note)}</div></div><div><div class="amt" style="color:${e.dir==='in'?'var(--t)':'var(--t2)'}">${e.dir==='in'?'+':'−'}${usd(e.paid)}</div><span class="pill ${tone(e.st)}">${e.st}</span></div></div>`).join('')||'<div class="d">Nothing matches these filters.</div>';}
  document.querySelectorAll('.chips').forEach(g=>g.addEventListener('click',ev=>{const b=ev.target.closest('.chip');if(!b)return;F[g.dataset.k]=b.dataset.v;g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));update();}));
  document.querySelectorAll('select').forEach(s=>s.onchange=()=>{F[s.dataset.k]=s.value;update();});
- $('#lockbtn').onclick=()=>{localStorage.removeItem(KEY);location.reload();};
+ $('#lockbtn').onclick=()=>{localStorage.removeItem(KEY);localStorage.removeItem(BIO);location.reload();};
  requestAnimationFrame(update);}
 
 function renderEquity(D){
