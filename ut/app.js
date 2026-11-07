@@ -100,7 +100,7 @@ function renderEquity(D){
  let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
  const minK=avail.length?avail[avail.length-1]:nowK;
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
- const KS=['HOA','Utilities','Escrow','Interest','Principal','Expenses','Mortgage'];
+ const KS=['HOA','Utilities','Escrow','Expenses','Interest','Principal','Mortgage'];
  function update(){
   const sel=[...selected];
   const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
@@ -125,7 +125,7 @@ function renderEquity(D){
   $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
-  const leg=['HOA','Utilities','Escrow','Interest','Principal','Expenses'].map(k=>costs.find(c=>c.k===k)).filter(Boolean).map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
+  const leg=['HOA','Utilities','Escrow','Expenses','Interest','Principal'].map(k=>costs.find(c=>c.k===k)).filter(Boolean).map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
   $('#eq-leg').innerHTML=leg;
   cur={costs,total:totalCost};showTip();clearTimeout(update.t);update.t=setTimeout(showTip,620);
   const net=revenue-totalCost;
