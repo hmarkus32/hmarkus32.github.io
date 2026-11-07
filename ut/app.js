@@ -7,9 +7,15 @@ async function decrypt(pc){const e=await (await fetch('data.enc.json',{cache:'no
  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pc),'PBKDF2',false,['deriveKey']);
  const k=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64(e.salt),iterations:e.iter},km,{name:'AES-GCM',length:256},false,['decrypt']);
  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},k,b64(e.ct));return JSON.parse(new TextDecoder().decode(pt));}
+let curPc=null;
 async function unlock(pc,remember){$('#err').textContent='';$('#go').textContent='Unlocking…';
- try{const d=await decrypt(pc);if(remember)localStorage.setItem(KEY,pc);render(d);$('#lock').style.opacity=0;setTimeout(()=>$('#lock').remove(),400);}
- catch(x){localStorage.removeItem(KEY);$('#err').textContent='Wrong passcode';$('#go').textContent='Unlock';}}
+ try{const d=await decrypt(pc);curPc=pc;if(remember)localStorage.setItem(KEY,pc);render(d);$('#lock').style.opacity=0;setTimeout(()=>$('#lock').remove(),400);}
+ catch(x){curPc=null;localStorage.removeItem(KEY);$('#err').textContent='Wrong passcode';$('#go').textContent='Unlock';}}
+async function refreshData(btn){if(!curPc){location.reload();return;}
+ btn.disabled=true;btn.textContent='Refreshing…';
+ try{if('serviceWorker'in navigator){try{const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update();}catch(e){}}
+  const d=await decrypt(curPc);render(d);}
+ catch(x){btn.disabled=false;btn.textContent='Refresh failed — tap to retry';}}
 $('#go').onclick=()=>unlock($('#pw').value,$('#rem').checked);
 $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')unlock($('#pw').value,$('#rem').checked);});
 const saved=localStorage.getItem(KEY);if(saved)unlock(saved,true);
@@ -170,12 +176,13 @@ function render(D){const now=new Date();const key=now.getFullYear()+'-'+String(n
  $('#app').innerHTML=`<div class="tabs"><button class="tab on" data-t="home">Home</button><button class="tab" data-t="det">Details</button><button class="tab" data-t="eq">Equity</button></div>
  <div id="home" class="view"><div class="sub" style="margin-top:14px">${stale?'Latest data':'This month'}</div><h1>${esc(label)}</h1>
  ${stale?`<div class="sub" style="color:var(--warn)">No data yet for ${new Date().toLocaleString('en-US',{month:'long'})}; showing ${esc(label)}</div>`:''}
- <div class="card" style="margin-top:16px;padding:4px 16px">${H.map((h,i)=>`<button class="prop" data-i="${i}">${icon(h.state)}<span class="pn">${esc(h.p)}</span><span class="ps ${h.state}">${esc(h.sum)}</span><span class="chev">›</span></button>`).join('')}</div></div>
+ <div class="card" style="margin-top:16px;padding:4px 16px">${H.map((h,i)=>`<button class="prop" data-i="${i}">${icon(h.state)}<span class="pn">${esc(h.p)}</span><span class="ps ${h.state}">${esc(h.sum)}</span><span class="chev">›</span></button>`).join('')}</div><button class="link" id="refreshbtn" style="display:block;margin:14px auto 2px">↻ Refresh</button></div>
  <div id="det" class="view" style="display:none"></div>
  <div id="eq" class="view" style="display:none"></div>
  <div id="scrim"></div><div id="sheet"><div class="grab"></div><div id="sc"></div></div>`;
  renderDetails(D);
  renderEquity(D);
+ const rb=$('#refreshbtn');if(rb)rb.onclick=()=>refreshData(rb);
  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
   ['home','det','eq'].forEach(v=>{const el=$('#'+v);el.style.display=v===t.dataset.t?'block':'none';if(v===t.dataset.t){el.style.animation='none';el.offsetHeight;el.style.animation='';}});window.scrollTo({top:0});});
  const close=()=>{$('#sheet').classList.remove('open');$('#scrim').classList.remove('open');};
