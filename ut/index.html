@@ -56,6 +56,6 @@ details summary{min-height:44px;display:flex;align-items:center;color:var(--t2);
 </style></head><body>
 <div id="lock"><div style="font-size:22px;font-weight:700">Dashboard</div><div class="sub">Enter passcode</div>
 <input id="pw" type="password" autocomplete="current-password" inputmode="text" enterkeyhint="go">
-<button class="btn" id="go">Unlock</button><label class="rem"><input type="checkbox" id="rem">Remember on this device</label><div id="err"></div></div>
+<button class="btn" id="go">Unlock</button><button class="btn" id="bio" style="display:none;background:var(--card);color:var(--t);border:1px solid var(--line);margin-top:10px">Unlock with Face ID</button><label class="rem"><input type="checkbox" id="rem">Remember on this device</label><div id="err"></div><button class="link" id="bioSetup" style="display:none">Enable Face ID on this device</button></div>
 <div id="app"></div>
 <script src="app.js"></script></body></html>
