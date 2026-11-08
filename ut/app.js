@@ -139,10 +139,12 @@ function renderEquity(D){
   const prin=(costs.find(c=>c.k==='Principal')||{v:0}).v;const netp=net+prin;const enp=$('#eq-netp');
   if(enp){enp.textContent=(netp>=0?'+':'')+usd(netp);enp.style.color=netp>=0?'#7D9B6A':'#D9534F';}
   placeLine();requestAnimationFrame(placeLine);
-  if(D.assets){const av=sel.filter(x=>D.assets[x]);const V=av.reduce((a,x)=>a+(+D.assets[x].value||0),0);const B=av.reduce((a,x)=>a+(+D.assets[x].balance||0),0);const E=Math.max(0,V-B);
-   const pct=V?E/V*100:0;$('#eqp-pct').textContent=(Math.round(pct*10)/10)+'% equity';
-   $('#eqp-eq').style.width=(V?E/V*100:0)+'%';$('#eqp-bal').style.width=(V?B/V*100:0)+'%';
-   $('#eqp-eqv').textContent=usd(E);$('#eqp-balv').textContent=usd(B);$('#eqp-val').textContent=usd(V);
+  if(D.assets){const av=sel.filter(x=>D.assets[x]);const V=av.reduce((a,x)=>a+(+D.assets[x].value||0),0);const B=av.reduce((a,x)=>a+(+D.assets[x].balance||0),0);const E=V-B,neg=E<0,T=neg?B:V;
+   const pct=V?E/V*100:0,pe=$('#eqp-pct');pe.textContent=(Math.round(pct*10)/10)+'% equity';pe.style.color=neg?'#D9534F':'';
+   const qe=$('#eqp-eq'),qb=$('#eqp-bal');qe.style.background=neg?'#D9534F':'#7D9B6A';qe.style.order=neg?2:0;
+   qe.style.width=(T?Math.abs(E)/T*100:0)+'%';qb.style.width=(T?(neg?V:B)/T*100:0)+'%';
+   const ld=qe.closest('.card').querySelector('.leg2 i');if(ld)ld.style.background=neg?'#D9534F':'#7D9B6A';
+   $('#eqp-eqv').textContent=neg?'-'+usd(Math.round(-E)):usd(E);$('#eqp-eqv').style.color=neg?'#D9534F':'';$('#eqp-balv').textContent=usd(B);$('#eqp-val').textContent=usd(V);
    const miss=sel.filter(x=>!D.assets[x]);$('#eqp-note').textContent=miss.length?('No value/balance on file for: '+miss.join(', ')):'';}
  }
  function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
