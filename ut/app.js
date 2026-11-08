@@ -139,6 +139,11 @@ function renderEquity(D){
   const prin=(costs.find(c=>c.k==='Principal')||{v:0}).v;const netp=net+prin;const enp=$('#eq-netp');
   if(enp){enp.textContent=(netp>=0?'+':'')+usd(netp);enp.style.color=netp>=0?'#7D9B6A':'#D9534F';}
   placeLine();requestAnimationFrame(placeLine);
+  if(D.assets){const av=sel.filter(x=>D.assets[x]);const V=av.reduce((a,x)=>a+(+D.assets[x].value||0),0);const B=av.reduce((a,x)=>a+(+D.assets[x].balance||0),0);const E=Math.max(0,V-B);
+   const pct=V?E/V*100:0;$('#eqp-pct').textContent=(Math.round(pct*10)/10)+'% equity';
+   $('#eqp-eq').style.width=(V?E/V*100:0)+'%';$('#eqp-bal').style.width=(V?B/V*100:0)+'%';
+   $('#eqp-eqv').textContent=usd(E);$('#eqp-balv').textContent=usd(B);$('#eqp-val').textContent=usd(V);
+   const miss=sel.filter(x=>!D.assets[x]);$('#eqp-note').textContent=miss.length?('No value/balance on file for: '+miss.join(', ')):'';}
  }
  function showTip(){const t=$('#eq-tip');const c=tipK&&cur.costs.find(x=>x.k===tipK);
   if(!c){tipK=null;t.style.opacity=0;t.style.transform='translateY(4px)';return;}
@@ -160,7 +165,8 @@ function renderEquity(D){
  <div id="eq-line" style="position:absolute;top:0;height:0;width:0;border-left:2px dotted rgba(255,255,255,.35);pointer-events:none;z-index:2;transition:left .6s cubic-bezier(.2,.8,.2,1)"></div>
  </div>
  <h2>Net</h2><div class="card"><div class="eq-num" id="eq-net" style="font-size:22px"></div></div>
- <h2>Net before principal</h2><div class="card"><div class="eq-num" id="eq-netp" style="font-size:22px"></div><div class="d" style="color:var(--t3);font-size:11px;margin-top:4px">Principal paydown excluded — it builds equity, it is not an expense</div></div>`;
+ <h2>Net before principal</h2><div class="card"><div class="eq-num" id="eq-netp" style="font-size:22px"></div><div class="d" style="color:var(--t3);font-size:11px;margin-top:4px">Principal paydown excluded — it builds equity, it is not an expense</div></div>${D.assets?`
+ <h2>Equity progress</h2><div class="card"><div class="eq-num" id="eqp-pct"></div><div class="hbar"><div class="seg" id="eqp-eq" style="width:0;background:#7D9B6A"></div><div class="seg" id="eqp-bal" style="width:0;background:#6E548C"></div></div><div class="leg2" style="margin-top:8px"><span><i style="background:#7D9B6A"></i>Equity <b id="eqp-eqv"></b></span><span><i style="background:#6E548C"></i>Loan balance <b id="eqp-balv"></b></span><span>Est. value <b id="eqp-val"></b></span></div><div class="d" id="eqp-note" style="color:var(--t3);font-size:11px;margin-top:6px"></div></div>`:``}`;
  $('#eq-cc').addEventListener('click',ev=>{const el=ev.target.closest('[data-k]');if(!el)return;tipK=tipK===el.dataset.k?null:el.dataset.k;showTip();});
  document.addEventListener('pointerdown',ev=>{if(tipK&&!ev.target.closest('#eq-cc [data-k],#eq-mn')){tipK=null;showTip();}
   if(!ev.target.closest('#eq-mn'))$('#eq-dd').classList.remove('open');});
