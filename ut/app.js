@@ -99,6 +99,7 @@ function renderEquity(D){
  const avail=[...new Set(R.filter(e=>e.paid!==null&&e.k!==null&&e.k<=nowK).map(e=>e.k))].sort((a,b)=>b-a);
  let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
  const minK=avail.length?avail[avail.length-1]:nowK;
+ let period='1M';
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
  const KS=['HOA','Utilities','Escrow','Expenses','Interest','Principal','Mortgage'];
  let lineF=0;
@@ -107,7 +108,8 @@ function renderEquity(D){
   if(!rr.width)return;line.style.left=(rr.left-wr.left+lineF*rr.width)+'px';line.style.top=(cr.top-wr.top)+'px';line.style.height=(rr.bottom-cr.top)+'px';}
  function update(){
   const sel=[...selected];
-  const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k===month);
+  const startK=period==='3M'?month-2:period==='12M'?month-11:period==='YTD'?Math.floor(month/12)*12:month;
+  const rows=R.filter(e=>sel.includes(e.p)&&e.paid!==null&&e.k>=startK&&e.k<=month);
   const sum=pred=>rows.filter(pred).reduce((a,e)=>a+(e.paid||0),0);
   const costs=[
    {k:'Principal',v:sum(e=>e.dir==='out'&&e.c==='Mortgage'&&/principal/i.test(e.item))},
@@ -127,7 +129,8 @@ function renderEquity(D){
   KS.forEach(k=>{const c=costs.find(x=>x.k===k),el=$(`#eq-cost [data-k="${k}"]`);el.style.width=(c?c.v/scale*100:0)+'%';el.style.minWidth=c?'':'0';el.title=c?`${k}: ${usd(c.v)}`:'';});
   const rv=$('#eq-rev .seg');rv.style.width=(revenue/scale*100)+'%';rv.style.minWidth=revenue?'':'0';rv.title=`Revenue: ${usd(revenue)}`;
   lineF=revenue/scale;
-  $('#eq-mt').textContent=mLabel(month);$('#eq-prev').disabled=month<=minK;$('#eq-next').disabled=month>=nowK;
+  const mShort=k=>MN[k%12].toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
+  $('#eq-mt').textContent=period==='1M'?mLabel(month):mShort(startK)+' \u2013 '+mShort(month);$('#eq-prev').disabled=startK<=minK;$('#eq-next').disabled=month>=nowK;
   $('#eq-cost-sum').textContent=usd(totalCost);
   $('#eq-rev-sum').textContent=usd(revenue);
   const leg=['HOA','Utilities','Escrow','Expenses','Interest','Principal'].map(k=>costs.find(c=>c.k===k)).filter(Boolean).map(c=>`<span data-k="${c.k}" style="cursor:pointer"><i style="background:${colors[c.k]||'#888'}"></i>${c.k}</span>`).join('');
@@ -156,10 +159,11 @@ function renderEquity(D){
   const w=t.offsetWidth;const x=Math.max(8,Math.min(r.left+r.width/2-card.left-w/2,card.width-w-8));
   t.style.left=x+'px';t.style.top=(bar.bottom-card.top+6)+'px';t.style.opacity=1;t.style.transform='translateY(0)';
  }
- $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">Monthly cash flow · same scale on both bars</div>
+ $('#eq').innerHTML=`<h1>Equity</h1><div class="sub">Cash flow · same scale on both bars</div>
  <h2>Properties</h2><div class="chips" id="eq-chips">${props.map(p=>`<button class="chip on" data-p="${esc(p)}">${esc(sh(p))}</button>`).join('')}</div>
  <div class="mnav" id="eq-mn"><button id="eq-prev" aria-label="Previous month">‹</button><button id="eq-mt" class="mt"></button><button id="eq-next" aria-label="Next month">›</button>
  <div class="mdd" id="eq-dd">${avail.map(k=>`<button data-m="${k}">${mLabel(k)}</button>`).join('')}</div></div>
+ <div class="chips" id="eq-period" style="margin-top:10px"><button class="chip on" data-per="1M">Month</button><button class="chip" data-per="3M">Last 3 months</button><button class="chip" data-per="YTD">YTD</button><button class="chip" data-per="12M">Last 12 months</button></div>
  <div id="eq-bars" style="position:relative">
  <h2>Costs</h2><div class="card" id="eq-cc" style="position:relative"><div class="eq-num" id="eq-cost-sum"></div><div class="leg2" id="eq-leg" style="margin:8px 0 0"></div><div class="hbar" id="eq-cost" style="cursor:pointer">${KS.map(k=>`<div class="seg" data-k="${k}" style="width:0;min-width:0;background:${colors[k]||'#888'}"></div>`).join('')}</div>
  <div id="eq-tip" style="position:absolute;left:0;top:0;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;background:var(--line);color:var(--t);font-size:12px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:5"></div></div>
@@ -182,6 +186,7 @@ function renderEquity(D){
   b.classList.toggle('on',selected.has(p));
   update();
  });
+ document.querySelectorAll('#eq-period .chip').forEach(b=>b.onclick=()=>{period=b.dataset.per;document.querySelectorAll('#eq-period .chip').forEach(x=>x.classList.toggle('on',x===b));update();});
  window.__eqFix=update;
  if(!window.__eqRes){window.__eqRes=1;window.addEventListener('resize',()=>{if(window.__eqFix)window.__eqFix();});}
  update();
