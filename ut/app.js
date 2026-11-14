@@ -98,6 +98,7 @@ function renderEquity(D){
  R.forEach(e=>e.k=mk(e.m));
  const avail=[...new Set(R.filter(e=>e.paid!==null&&e.k!==null&&e.k<=nowK).map(e=>e.k))].sort((a,b)=>b-a);
  let month=avail.includes(nowK)||!avail.length?nowK:avail[0];
+ const homeK=month;
  const minK=avail.length?avail[avail.length-1]:nowK;
  let period='1M';
  const mLabel=k=>new Date(Math.floor(k/12),k%12,1).toLocaleString('en-US',{month:'long'}).toUpperCase()+(Math.floor(k/12)!==now.getFullYear()?' '+Math.floor(k/12):'');
@@ -186,7 +187,7 @@ function renderEquity(D){
   b.classList.toggle('on',selected.has(p));
   update();
  });
- document.querySelectorAll('#eq-period .chip').forEach(b=>b.onclick=()=>{period=b.dataset.per;document.querySelectorAll('#eq-period .chip').forEach(x=>x.classList.toggle('on',x===b));update();});
+ document.querySelectorAll('#eq-period .chip').forEach(b=>b.onclick=()=>{period=b.dataset.per;if(period!=='1M')month=homeK;document.querySelectorAll('#eq-period .chip').forEach(x=>x.classList.toggle('on',x===b));update();});
  window.__eqFix=update;
  if(!window.__eqRes){window.__eqRes=1;window.addEventListener('resize',()=>{if(window.__eqFix)window.__eqFix();});}
  update();
