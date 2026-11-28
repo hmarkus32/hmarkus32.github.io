@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<rect width="1024" height="1024" rx="200" fill="#0a0c10"/>
+<polygon points="690,88 758,88 758,208 690,179" fill="#eef1f6"/>
+<polyline points="150,262 512,108 874,262" fill="none" stroke="#eef1f6" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#3e8cff"><path transform="translate(146.0,631.6) scale(0.40800,-0.40800)" d="M689 0H495V291H271V0H77V714H271V449H495V714H689Z"/></g>
+<g fill="#eef1f6"><path transform="translate(483.0,631.6) scale(0.40800,-0.40800)" d="M388 0 242 514H238Q240 494 242.0 460.0Q244 426 246.0 386.5Q248 347 248 310V0H77V714H334L483 207H487L633 714H890V0H713V313Q713 347 714.0 385.5Q715 424 717.0 458.5Q719 493 720 513H716L572 0Z"/></g>
+<g fill="#eef1f6"><path transform="translate(146.0,979.7) scale(0.40800,-0.40800)" d="M388 0 242 514H238Q240 494 242.0 460.0Q244 426 246.0 386.5Q248 347 248 310V0H77V714H334L483 207H487L633 714H890V0H713V313Q713 347 714.0 385.5Q715 424 717.0 458.5Q719 493 720 513H716L572 0Z"/></g>
+<g fill="#3e8cff"><path transform="translate(565.0,979.7) scale(0.40800,-0.40800)" d="M689 0H495V291H271V0H77V714H271V449H495V714H689Z"/></g>
+</svg>
